@@ -1,0 +1,38 @@
+<!doctype  html>
+<html lang="fr">
+<head>
+
+	<title>Chess</title>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/css/chess.css">
+
+</head>
+<body>
+
+	<section class="global">
+
+		<div class="chess-board-container" style="width: 600px; height: 600px;">
+			<canvas id="chess-board" width="600" height="600"></canvas>
+		</div>
+
+	</section>
+
+	<script src="./vendor/jquery/jquery-3.3.0.min.js"></script>
+	<script src="./vendor/ocanvas/ocanvas-2.8.8.min.js"></script>
+	<script src="./config/app.js"></script>
+	<script src="./src/services/graphics/graphic.js"></script>
+	<script src="./src/controllers/main.js"></script>
+	<script>
+
+		(function($, chess) {
+
+			var mainController = new chess.Main();
+			mainController.init();
+
+		})(jQuery, Chess);
+
+	</script>
+
+</body>
+</html>
