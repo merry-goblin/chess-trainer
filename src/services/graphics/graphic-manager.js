@@ -62,7 +62,7 @@ var Chess = Chess || {};
 				let y = e.pageY - $("#chess-board").offset().top;
 
 				let position = calculatePiecePosition(x, y);
-				controller.triggerClick(position);
+				controller.getAgentManager().triggerClick(position);
 			});
 		}
 

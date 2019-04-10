@@ -44,6 +44,11 @@ var Chess = Chess || {};
 				
 			},
 
+			triggerClick(position) {
+
+				
+			},
+
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak
 			 * @return null

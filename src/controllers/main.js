@@ -94,11 +94,6 @@ var Chess = Chess || {};
 				stateManager.startGame();
 			},
 
-			triggerClick(position) {
-
-				console.log(position);
-			},
-
 			getGraphicManager: function() { return graphicManager; },
 			getStateManager:   function() { return stateManager;   },
 			getAgentManager:   function() { return agentManager;   },
