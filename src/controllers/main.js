@@ -17,6 +17,7 @@ var Chess = Chess || {};
 		var settings = $.extend({}, settings);
 
 		var graphics = null;
+		var stateManager = null;
 
 		var interval = null;
 
@@ -53,6 +54,7 @@ var Chess = Chess || {};
 
 		function handleGraphics() {
 
+			graphics = new chess.Graphics();
 			graphics.init(self, "chess-board");
 
 			// Set interval
@@ -65,9 +67,13 @@ var Chess = Chess || {};
 			$("#chess-board").click(function(e) {
 				let x = e.pageX - $("#chess-board").offset().left;
 				let y = e.pageY - $("#chess-board").offset().top;
-
-				
 			});
+		}
+
+		function handleStates() {
+
+			stateManager = new chess.StateManager();
+			stateManager.init(self);
 		}
 
 		var scope = {
@@ -78,13 +84,15 @@ var Chess = Chess || {};
 			 * Load and init any resources
 			 * return null
 			 */
-			init: function() {
+			init: function(whiteAgent, blackAgent) {
 
 				self = this;
 
-				graphics = new chess.Graphics();
 				handleGraphics();
 				handleUI();
+				handleStates();
+
+				stateManager.startGame();
 			},
 
 			triggerClick(position) {

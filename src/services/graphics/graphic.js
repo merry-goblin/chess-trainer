@@ -40,15 +40,6 @@ var Chess = Chess || {};
 
 		/*** Private methods ***/
 
-		/**
-		 * Free any pointer stored on this object
-		 * @return null
-		 */
-		function cleanMemory() {
-
-			
-		}
-
 		function initOCanvas() {
 
 			var boardDomElement = document.getElementById(chessboardId);
@@ -262,6 +253,24 @@ var Chess = Chess || {};
 			piece.remove();
 
 			pieces[y][x] = null;
+		}
+
+		/**
+		 * Free any pointer stored on this object
+		 * @return null
+		 */
+		function cleanMemory() {
+
+			settings = null;
+			controller = null;
+			canvas = null;
+
+			if (layer != null) {
+				layer.remove();
+			}
+			layer = null;
+			board = null;
+			pieces = null;
 		}
 
 		var scope = {
