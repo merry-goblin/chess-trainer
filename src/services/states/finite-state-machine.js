@@ -77,6 +77,13 @@ var Chess = Chess || {};
 				}
 			},
 
+			isTransitionValid: function($transitionName) {
+
+				let state = getNextState($transitionName);
+
+				return (state != null) ? true : false;
+			},
+
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak
 			 * @return null

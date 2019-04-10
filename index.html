@@ -21,18 +21,20 @@
 	<script src="./vendor/jquery/jquery-3.3.0.min.js"></script>
 	<script src="./vendor/ocanvas/ocanvas-2.8.8.min.js"></script>
 	<script src="./config/app.js"></script>
-	<script src="./src/services/graphics/graphic.js"></script>
+	<script src="./src/services/graphics/graphic-manager.js"></script>
 	<script src="./src/services/states/state-manager.js"></script>
 	<script src="./src/services/states/finite-state-machine.js"></script>
 	<script src="./src/services/agents/agent-manager.js"></script>
-	<script src="./src/services/states/player-agent.js"></script>
+	<script src="./src/services/agents/player-agent.js"></script>
 	<script src="./src/controllers/main.js"></script>
 	<script>
 
 		(function($, chess) {
 
 			var mainController = new chess.Main();
-			mainController.init();
+			let whiteAgent = "player-agent";
+			let blackAgent = "player-agent";
+			mainController.init(whiteAgent, blackAgent);
 
 		})(jQuery, Chess);
 

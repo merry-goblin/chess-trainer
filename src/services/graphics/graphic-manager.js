@@ -9,7 +9,7 @@ var Chess = Chess || {};
 
 (function($, chess) {
 
-	chess.Graphics = function(settings) {
+	chess.GraphicManager = function(settings) {
 
 		/*** Private properties ***/
 

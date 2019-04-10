@@ -9,7 +9,7 @@ var Chess = Chess || {};
 
 (function($, chess) {
 
-	chess.StageManager = function(settings) {
+	chess.StateManager = function(settings) {
 
 		/*** Private properties ***/
 
@@ -37,7 +37,7 @@ var Chess = Chess || {};
 
 				controller = controllerParam;
 
-				stateMachine = new FiniteStateMachine();
+				stateMachine = new chess.FiniteStateMachine();
 				stateMachine.init();
 			},
 

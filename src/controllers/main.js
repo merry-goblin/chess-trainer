@@ -16,8 +16,9 @@ var Chess = Chess || {};
 		var self = null;
 		var settings = $.extend({}, settings);
 
-		var graphics = null;
-		var stateManager = null;
+		var graphicManager = null;
+		var stateManager   = null;
+		var agentManager   = null;
 
 		var interval = null;
 
@@ -40,7 +41,7 @@ var Chess = Chess || {};
 		 */
 		function loop() {
 
-			graphics.update();
+			graphicManager.update();
 		}
 
 		/**
@@ -54,26 +55,24 @@ var Chess = Chess || {};
 
 		function handleGraphics() {
 
-			graphics = new chess.Graphics();
-			graphics.init(self, "chess-board");
+			graphicManager = new chess.GraphicManager();
+			graphicManager.init(self, "chess-board");
 
 			// Set interval
 			// Calculate next step from the chess board
 			interval = setInterval(loop, chess.config.loopInterval);
 		}
 
-		function handleUI() {
-
-			$("#chess-board").click(function(e) {
-				let x = e.pageX - $("#chess-board").offset().left;
-				let y = e.pageY - $("#chess-board").offset().top;
-			});
-		}
-
 		function handleStates() {
 
 			stateManager = new chess.StateManager();
 			stateManager.init(self);
+		}
+
+		function handleAgents(whiteAgentKey, blackAgentKey) {
+
+			agentManager = new chess.AgentManager();
+			agentManager.init(whiteAgentKey, blackAgentKey);
 		}
 
 		var scope = {
@@ -84,21 +83,25 @@ var Chess = Chess || {};
 			 * Load and init any resources
 			 * return null
 			 */
-			init: function(whiteAgent, blackAgent) {
+			init: function(whiteAgentKey, blackAgentKey) {
 
 				self = this;
 
 				handleGraphics();
-				handleUI();
 				handleStates();
+				handleAgents(whiteAgentKey, blackAgentKey);
 
 				stateManager.startGame();
 			},
 
 			triggerClick(position) {
 
-				
+				console.log(position);
 			},
+
+			getGraphicManager: function() { return graphicManager; },
+			getStateManager:   function() { return stateManager;   },
+			getAgentManager:   function() { return agentManager;   },
 
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak
