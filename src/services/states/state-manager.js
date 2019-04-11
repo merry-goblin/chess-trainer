@@ -24,7 +24,7 @@ var Chess = Chess || {};
 
 		function buildStateMachine() {
 
-			let initialState = 'game-ready';
+			let initialState = 'gameReady';
 			let transitions = {
 				startGame:  { from: 'gameReady',          to: 'agentInitialized'  },
 				startRound: { from: 'agentInitialized',   to: 'waitSelection'     },
@@ -42,11 +42,11 @@ var Chess = Chess || {};
 
 		function prepareEvents() {
 
-			events = array();
+			events = new Array();
 
 			//	Those events are informative and will not stop the process
 			let stateNames = stateMachine.getStateNames();
-			for (stateName in stateNames) {
+			for (stateName of stateNames) {
 				events[stateName] = new Array();
 				events[stateName]['before'] = new Array();
 				events[stateName]['after'] = new Array();
@@ -54,27 +54,23 @@ var Chess = Chess || {};
 
 			//	Those events can be blocked by the callback
 			let transitionNames = stateMachine.getTransitionNames();
-			for (transitionName in transitionNames) {
-				events[transitionName] = new Array();
+			for (transitionName of transitionNames) {
+				if (events[transitionName] == null) {
+					events[transitionName] = new Array();
+				}
 				events[transitionName]['on'] = new Array();
 			}
 		}
 
 		function registerOnStateEvent(event, state, callback) {
 
-			if (events[state] == null) {
-				events[state] = new Array();
-			}
-			if (events[state][event] == null) {
-				events[state][event] = new Array();
-			}
 			events[state][event].push(callback);
 		}
 
-		function dispatchStateEvent(event, state) {
+		function dispatchStateEvent(event, state, parameters) {
 
-			if (events[state] != null && events[state][event] != null) {
-				
+			for (let callback of events[state][event]) {
+				callback(parameters);
 			}
 		}
 
@@ -105,17 +101,16 @@ var Chess = Chess || {};
 
 			trigger: function(transition) {
 
-				if (stateMachine.isTransitionValid(transition)) {
+				if ((state = stateMachine.isTransitionValid(transition)) != null) {
 
 					//	Before
-					let
+					dispatchStateEvent('before', state);
 
-					if (stateMachine.applyTransition(transition)) {
+					stateMachine.applyTransition(transition);
 
-						dispatch
-					}
+					//	After
+					dispatchStateEvent('after', state);
 				}
-
 			},
 
 			/**

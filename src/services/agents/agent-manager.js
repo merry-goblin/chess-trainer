@@ -26,7 +26,7 @@ var Chess = Chess || {};
 		function registerOnEvents() {
 
 			let stateManager = controller.getStateManager();
-			stateManager.register('before', 'agentInitialized', [self, 'beforeAgentInitialized']);
+			stateManager.register('before', 'agentInitialized', self.beforeAgentInitialized);
 		}
 
 		/**

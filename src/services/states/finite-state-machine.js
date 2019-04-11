@@ -24,11 +24,11 @@ var Chess = Chess || {};
 
 		/*** Private methods ***/
 
-		function getNextState($transitionName) {
+		function getNextState(transitionName) {
 
 			let nextState = null;
-			if (transitions[$transitionName] != null) {
-				let transition = transitions[$transitionName];
+			if (transitions[transitionName] != null) {
+				let transition = transitions[transitionName];
 				if (currentState == transition.from) {
 					nextState = transition.to;
 				}
@@ -39,16 +39,16 @@ var Chess = Chess || {};
 
 		function prepareStateNames() {
 
-			stateNames = array();
-			for (let transition of transitions) {
-				addState(transition.from);
-				addState(transition.to);
+			stateNames = new Array();
+			for (let transitionName in transitions) {
+				addState(transitions[transitionName].from);
+				addState(transitions[transitionName].to);
 			}
 		}
 
 		function prepareTransitionNames() {
 
-			transitionNames = array();
+			transitionNames = new Array();
 			for (let transitionName in transitions) {
 				transitionNames.push(transitionName);
 			}
@@ -56,7 +56,7 @@ var Chess = Chess || {};
 
 		function addState(stateName) {
 
-			if (stateNames.indexOf(stateName) != -1) {
+			if (stateNames.indexOf(stateName) == -1) {
 				stateNames.push(stateName);
 			}
 		}
@@ -89,9 +89,16 @@ var Chess = Chess || {};
 				return currentState;
 			},
 
-			applyTransition: function($transitionName) {
+			isTransitionValid: function(transitionName) {
 
-				let state = getNextState($transitionName);
+				let state = getNextState(transitionName);
+
+				return state;
+			},
+
+			applyTransition: function(transitionName) {
+
+				let state = getNextState(transitionName);
 
 				if (state != null) {
 					currentState = state;
@@ -100,13 +107,6 @@ var Chess = Chess || {};
 				else {
 					return false;
 				}
-			},
-
-			isTransitionValid: function($transitionName) {
-
-				let state = getNextState($transitionName);
-
-				return (state != null) ? true : false;
 			},
 
 			getStateNames: function() {
