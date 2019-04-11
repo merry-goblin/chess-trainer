@@ -15,16 +15,12 @@ var Chess = Chess || {};
 
 		var settings = $.extend({}, settings);
 
-		var initialState = 'game-ready';
+		var initialState = null;
 		var currentState = null;
-		var transitions = {
-			startGame:  { from: 'game-ready',          to: 'agent-initialized'  },
-			startRound: { from: 'agent-initialized',   to: 'wait-selection'     },
-			selection:  { from: 'wait-selection',      to: 'wait-movement'      },
-			movement:   { from: 'wait-movement',       to: 'agent-desactivated' },
-			endRound:   { from: 'agent-desactivated',  to: 'agent-initialized'  },
-			endGame:    { from: 'agent-desactivated',  to: 'game-over'          }
-		};
+		var transitions  = null;
+
+		var stateNames       = null;
+		var transitionNames  = null;
 
 		/*** Private methods ***/
 
@@ -41,6 +37,30 @@ var Chess = Chess || {};
 			return nextState;
 		}
 
+		function prepareStateNames() {
+
+			stateNames = array();
+			for (let transition of transitions) {
+				addState(transition.from);
+				addState(transition.to);
+			}
+		}
+
+		function prepareTransitionNames() {
+
+			transitionNames = array();
+			for (let transitionName in transitions) {
+				transitionNames.push(transitionName);
+			}
+		}
+
+		function addState(stateName) {
+
+			if (stateNames.indexOf(stateName) != -1) {
+				stateNames.push(stateName);
+			}
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
@@ -54,9 +74,14 @@ var Chess = Chess || {};
 
 			/*** Public methods ***/
 
-			init: function() {
+			init: function(initialStateParam, transitionsParam) {
 
-				currentState = initialState;
+				initialState = initialStateParam;
+				currentState = initialStateParam;
+				transitions  = transitionsParam;
+
+				prepareStateNames();
+				prepareTransitionNames();
 			},
 
 			getCurrentState: function() {
@@ -82,6 +107,16 @@ var Chess = Chess || {};
 				let state = getNextState($transitionName);
 
 				return (state != null) ? true : false;
+			},
+
+			getStateNames: function() {
+
+				return stateNames;
+			},
+
+			getTransitionNames: function() {
+
+				return transitionNames;
 			},
 
 			/**

@@ -31,9 +31,10 @@
 
 		(function($, chess) {
 
+			let whiteAgent = new chess.PlayerAgent();
+			let blackAgent = new chess.PlayerAgent();
+
 			var mainController = new chess.Main();
-			let whiteAgent = "player-agent";
-			let blackAgent = "player-agent";
 			mainController.init(whiteAgent, blackAgent);
 
 		})(jQuery, Chess);

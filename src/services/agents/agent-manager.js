@@ -15,11 +15,19 @@ var Chess = Chess || {};
 
 		var settings = $.extend({}, settings);
 
+		var self = null;
+
 		var controller = null;
 		var whiteAgent = null;
 		var blackAgent = null;
 
 		/*** Private methods ***/
+
+		function registerOnEvents() {
+
+			let stateManager = controller.getStateManager();
+			stateManager.register('before', 'agentInitialized', [self, 'beforeAgentInitialized']);
+		}
 
 		/**
 		 * Free any pointer stored on this object
@@ -34,19 +42,20 @@ var Chess = Chess || {};
 
 			/*** Public methods ***/
 
-			init: function(controllerParam) {
+			init: function(controllerParam, whiteAgentParam, blackAgentParam) {
+
+				self = this;
 
 				controller = controllerParam;
+				whiteAgent = whiteAgentParam;
+				blackAgent = blackAgentParam;
+
+				registerOnEvents();
 			},
 
-			startGame: function() {
+			beforeAgentInitialized: function() {
 
-				
-			},
-
-			triggerClick(position) {
-
-				
+				console.log("agentManager.beforeAgentInitialized()");
 			},
 
 			/**

@@ -69,10 +69,10 @@ var Chess = Chess || {};
 			stateManager.init(self);
 		}
 
-		function handleAgents(whiteAgentKey, blackAgentKey) {
+		function handleAgents(whiteAgent, blackAgent) {
 
 			agentManager = new chess.AgentManager();
-			agentManager.init(whiteAgentKey, blackAgentKey);
+			agentManager.init(self, whiteAgent, blackAgent);
 		}
 
 		var scope = {
@@ -91,7 +91,12 @@ var Chess = Chess || {};
 				handleStates();
 				handleAgents(whiteAgentKey, blackAgentKey);
 
-				stateManager.startGame();
+				stateManager.trigger('startGame');
+			},
+
+			triggerClick(position) {
+
+				
 			},
 
 			getGraphicManager: function() { return graphicManager; },
