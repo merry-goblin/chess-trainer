@@ -7,7 +7,7 @@
 /** @namespace */
 var Chess = Chess || {};
 
-(function($, chess) {
+(function(chess) {
 
 	chess.AgentManager = function(settings) {
 
@@ -17,16 +17,35 @@ var Chess = Chess || {};
 
 		var self = null;
 
-		var controller = null;
-		var whiteAgent = null;
-		var blackAgent = null;
+		var controller   = null;
+		var whiteAgent   = null;
+		var blackAgent   = null;
+		var currentAgent = null;
+
+		playerRound = null;
 
 		/*** Private methods ***/
 
 		function registerOnEvents() {
 
 			let stateManager = controller.getStateManager();
-			stateManager.register('before', 'agentInitialized', self.beforeAgentInitialized);
+			stateManager.register('before', 'agentActivated', self.beforeAgentInitialized);
+			stateManager.register('after', 'waitSelection', self.afterWaitSelection);
+
+			whiteAgent.setFunctionToTriggerEvents(self.agentSelection, self.agentMovement);
+			blackAgent.setFunctionToTriggerEvents(self.agentSelection, self.agentMovement);
+		}
+
+		function activateAgent() {
+
+			if (playerRound == 'white') {
+				currentAgent = whiteAgent;
+				whiteAgent.activate();
+			}
+			else {
+				currentAgent = blackAgent;
+				blackAgent.activate();
+			}
 		}
 
 		/**
@@ -35,7 +54,20 @@ var Chess = Chess || {};
 		 */
 		function cleanMemory() {
 
-			
+			if (whiteAgent != null) {
+				whiteAgent.destruct();
+			}
+			if (blackAgent != null) {
+				blackAgent.destruct();
+			}
+
+			settings     = null;
+			controller   = null;
+			whiteAgent   = null;
+			blackAgent   = null;
+			currentAgent = null;
+			playerRound  = null;
+			self         = null;
 		}
 
 		var scope = {
@@ -53,9 +85,58 @@ var Chess = Chess || {};
 				registerOnEvents();
 			},
 
+			/**
+			 * Called by state manager
+			 * @return null
+			 */
 			beforeAgentInitialized: function() {
 
-				console.log("agentManager.beforeAgentInitialized()");
+				if (playerRound == null) {
+					playerRound = 'white';
+				}
+				else {
+					playerRound = (playerRound == 'white') ? 'black' : 'white';
+				}
+				activateAgent();
+			},
+
+			/**
+			 * Called by an agent
+			 * @param  object position
+			 * @return null
+			 */
+			afterWaitSelection: function() {
+
+				
+			},
+
+			triggerClick: function(position) {
+
+				//	todo : verify if a piece is on this case and
+				//	       if this piece belongs to current agent
+				
+				currentAgent.pieceSelection(position);
+			},
+
+			/**
+			 * Called by an agent
+			 * @param  object position
+			 * @return null
+			 */
+			agentSelection: function(position) {
+
+				console.log(position);
+				controller.getStateManager().trigger('selection');
+			},
+
+			/**
+			 * Called by an agent
+			 * @param  object position
+			 * @return null
+			 */
+			agentMovement: function(position) {
+
+				controller.getStateManger().trigger('movement');
 			},
 
 			/**
@@ -70,4 +151,4 @@ var Chess = Chess || {};
 		return scope;
 	}
 
-})(jQuery, Chess);
+})(Chess);

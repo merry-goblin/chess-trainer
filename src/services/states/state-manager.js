@@ -7,13 +7,15 @@
 /** @namespace */
 var Chess = Chess || {};
 
-(function($, chess) {
+(function(chess) {
 
 	chess.StateManager = function(settings) {
 
 		/*** Private properties ***/
 
 		var settings = $.extend({}, settings);
+
+		var self = null;
 
 		var controller   = null;
 		var stateMachine = null;
@@ -26,11 +28,11 @@ var Chess = Chess || {};
 
 			let initialState = 'gameReady';
 			let transitions = {
-				startGame:  { from: 'gameReady',          to: 'agentInitialized'  },
-				startRound: { from: 'agentInitialized',   to: 'waitSelection'     },
+				startGame:  { from: 'gameReady',          to: 'agentActivated'    },
+				startRound: { from: 'agentActivated',     to: 'waitSelection'     },
 				selection:  { from: 'waitSelection',      to: 'waitMovement'      },
 				movement:   { from: 'waitMovement',       to: 'agentDesactivated' },
-				endRound:   { from: 'agentDesactivated',  to: 'agentInitialized'  },
+				endRound:   { from: 'agentDesactivated',  to: 'agentActivated'    },
 				endGame:    { from: 'agentDesactivated',  to: 'gameOver'          }
 			};
 
@@ -74,13 +76,24 @@ var Chess = Chess || {};
 			}
 		}
 
+		function registerOnEvents() {
+
+			self.register('after', 'agentActivated', self.afterAgentInitialized);
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
 		 */
 		function cleanMemory() {
 
-			
+			stateMachine.destroy();
+
+			settings      = null;
+			controller    = null;
+			stateMachine  = null;
+			events        = null;
+			self          = null;
 		}
 
 		var scope = {
@@ -89,9 +102,12 @@ var Chess = Chess || {};
 
 			init: function(controllerParam) {
 
+				self = this;
+
 				controller = controllerParam;
 
 				buildStateMachine();
+				registerOnEvents();
 			},
 
 			register: function(event, state, callback) {
@@ -113,6 +129,11 @@ var Chess = Chess || {};
 				}
 			},
 
+			afterAgentInitialized: function() {
+
+				self.trigger('startRound');
+			},
+
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak
 			 * @return null
@@ -125,4 +146,4 @@ var Chess = Chess || {};
 		return scope;
 	}
 
-})(jQuery, Chess);
+})(Chess);

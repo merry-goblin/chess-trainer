@@ -15,6 +15,8 @@ var Chess = Chess || {};
 
 		var settings = $.extend({}, settings);
 
+		var self = null;
+
 		var controller   = null;
 		var chessboardId = null;
 
@@ -37,6 +39,8 @@ var Chess = Chess || {};
 			knight: 5,
 			pawn: 6,
 		}
+
+		var xPosition = ['A','B','C','D','E','F','G','H'];
 
 		/*** Private methods ***/
 
@@ -62,7 +66,7 @@ var Chess = Chess || {};
 				let y = e.pageY - $("#chess-board").offset().top;
 
 				let position = calculatePiecePosition(x, y);
-				controller.triggerClick(position);
+				controller.getAgentManager().triggerClick(position);
 			});
 		}
 
@@ -261,16 +265,17 @@ var Chess = Chess || {};
 		 */
 		function cleanMemory() {
 
-			settings = null;
-			controller = null;
-			canvas = null;
-
 			if (layer != null) {
 				layer.remove();
 			}
-			layer = null;
-			board = null;
-			pieces = null;
+
+			settings    = null;
+			controller  = null;
+			canvas      = null;
+			layer       = null;
+			board       = null;
+			pieces      = null;
+			self        = null;
 		}
 
 		var scope = {
@@ -282,6 +287,8 @@ var Chess = Chess || {};
 			 * @param string worldId
 			 */
 			init: function(ctrl, id) {
+
+				self = this;
 
 				controller = ctrl;
 				chessboardId = id;

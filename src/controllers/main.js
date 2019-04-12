@@ -22,18 +22,9 @@ var Chess = Chess || {};
 
 		var interval = null;
 
-		var playerTurn = "white";
+		var pieces = null;
 
 		/*** Private methods ***/
-
-		/**
-		 * Free any pointer stored on this object
-		 * @return null
-		 */
-		function cleanMemory() {
-
-			stopLoop();
-		}
 
 		/**
 		 * Application's main loop
@@ -51,6 +42,11 @@ var Chess = Chess || {};
 		function stopLoop() {
 	
 			clearInterval(interval);
+		}
+
+		function fillChessBoard(customChessBoard) {
+
+
 		}
 
 		function handleGraphics() {
@@ -75,6 +71,25 @@ var Chess = Chess || {};
 			agentManager.init(self, whiteAgent, blackAgent);
 		}
 
+		/**
+		 * Free any pointer stored on this object
+		 * @return null
+		 */
+		function cleanMemory() {
+
+			stopLoop();
+
+			graphicManager.destroy();
+			stateManager.destroy();
+			agentManager.destroy();
+
+			graphicManager  = null;
+			stateManager    = null;
+			agentManager    = null;
+			pieces          = null;
+			self            = null;
+		}
+
 		var scope = {
 
 			/*** Public methods ***/
@@ -83,20 +98,17 @@ var Chess = Chess || {};
 			 * Load and init any resources
 			 * return null
 			 */
-			init: function(whiteAgentKey, blackAgentKey) {
+			init: function(whiteAgentKey, blackAgentKey, customChessBoard) {
 
 				self = this;
+
+				fillChessBoard(customChessBoard);
 
 				handleGraphics();
 				handleStates();
 				handleAgents(whiteAgentKey, blackAgentKey);
 
 				stateManager.trigger('startGame');
-			},
-
-			triggerClick(position) {
-
-				
 			},
 
 			getGraphicManager: function() { return graphicManager; },

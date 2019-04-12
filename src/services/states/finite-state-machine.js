@@ -7,7 +7,7 @@
 /** @namespace */
 var Chess = Chess || {};
 
-(function($, chess) {
+(function(chess) {
 
 	chess.FiniteStateMachine = function(settings) {
 
@@ -67,7 +67,12 @@ var Chess = Chess || {};
 		 */
 		function cleanMemory() {
 
-			
+			settings         = null;
+			initialState     = null;
+			currentState     = null;
+			transitions      = null;
+			stateNames       = null;
+			transitionNames  = null;
 		}
 
 		var scope = {
@@ -131,4 +136,4 @@ var Chess = Chess || {};
 		return scope;
 	}
 
-})(jQuery, Chess);
+})(Chess);
