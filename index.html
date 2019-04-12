@@ -21,6 +21,7 @@
 	<script src="./vendor/jquery/jquery-3.3.0.min.js"></script>
 	<script src="./vendor/ocanvas/ocanvas-2.8.8.min.js"></script>
 	<script src="./config/app.js"></script>
+	<script src="./src/services/utils.js"></script>
 	<script src="./src/services/graphics/graphic-manager.js"></script>
 	<script src="./src/services/rules/rule-manager.js"></script>
 	<script src="./src/services/rules/rules.js"></script>
@@ -33,11 +34,12 @@
 
 		(function($, chess) {
 
-			let whiteAgent = new chess.PlayerAgent();
-			let blackAgent = new chess.PlayerAgent();
+			let whiteAgent  = new chess.PlayerAgent();
+			let blackAgent  = new chess.PlayerAgent();
+			let customModel = null;
 
 			var mainController = new chess.Main();
-			mainController.init(whiteAgent, blackAgent);
+			mainController.init(whiteAgent, blackAgent, customModel);
 
 		})(jQuery, Chess);
 

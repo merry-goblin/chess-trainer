@@ -28,12 +28,13 @@ var Chess = Chess || {};
 
 			let initialState = 'gameReady';
 			let transitions = {
-				startGame:  { from: 'gameReady',          to: 'agentActivated'    },
-				startRound: { from: 'agentActivated',     to: 'waitSelection'     },
-				selection:  { from: 'waitSelection',      to: 'waitMovement'      },
-				movement:   { from: 'waitMovement',       to: 'agentDesactivated' },
-				endRound:   { from: 'agentDesactivated',  to: 'agentActivated'    },
-				endGame:    { from: 'agentDesactivated',  to: 'gameOver'          }
+				startGame:       { from: 'gameReady',          to: 'agentActivated'    },
+				startRound:      { from: 'agentActivated',     to: 'waitSelection'     },
+				selection:       { from: 'waitSelection',      to: 'waitMovement'      },
+				movement:        { from: 'waitMovement',       to: 'agentDesactivated' },
+				cancelSelection: { from: 'waitMovement',       to: 'waitSelection'     },
+				endRound:        { from: 'agentDesactivated',  to: 'agentActivated'    },
+				endGame:         { from: 'agentDesactivated',  to: 'gameOver'          }
 			};
 
 			stateMachine = new chess.FiniteStateMachine();
@@ -127,6 +128,11 @@ var Chess = Chess || {};
 					//	After
 					dispatchStateEvent('after', state);
 				}
+			},
+
+			is: function(state) {
+
+				return (stateMachine.getCurrentState() == state) ? true : false;
 			},
 
 			afterAgentInitialized: function() {

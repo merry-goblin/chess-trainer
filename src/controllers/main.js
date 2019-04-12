@@ -19,10 +19,9 @@ var Chess = Chess || {};
 		var graphicManager = null;
 		var stateManager   = null;
 		var agentManager   = null;
+		var ruleManager    = null;
 
 		var interval = null;
-
-		var pieces = null;
 
 		/*** Private methods ***/
 
@@ -44,9 +43,30 @@ var Chess = Chess || {};
 			clearInterval(interval);
 		}
 
-		function fillChessBoard(customChessBoard) {
+		function fillChessboard(customModel) {
 
+			let model = (customModel != null) ? customModel : chess.config.defaultModel;
 
+			initChessboard();
+			fillChessboardWithModel(model);
+		}
+
+		function initChessboard() {
+
+			self.pieces = new Array(8);
+			for (var i=0; i<8; i++) {
+				self.pieces[i] = [null, null, null, null, null, null, null, null];
+			}
+		}
+
+		function fillChessboardWithModel(model) {
+
+			for (positionLabel in model) {
+				let pos    = chess.utils.convertToArrayPosition(positionLabel);
+				let piece  = model[positionLabel];
+
+				self.pieces[pos.y][pos.x] = piece;
+			}
 		}
 
 		function handleGraphics() {
@@ -82,15 +102,21 @@ var Chess = Chess || {};
 			graphicManager.destroy();
 			stateManager.destroy();
 			agentManager.destroy();
+			ruleManager.destroy();
 
 			graphicManager  = null;
 			stateManager    = null;
 			agentManager    = null;
-			pieces          = null;
+			ruleManager     = null;
+			self.pieces     = null;
 			self            = null;
 		}
 
 		var scope = {
+
+			/*** Public properties ***/
+
+			pieces: null,
 
 			/*** Public methods ***/
 
@@ -98,11 +124,11 @@ var Chess = Chess || {};
 			 * Load and init any resources
 			 * return null
 			 */
-			init: function(whiteAgentKey, blackAgentKey, customChessBoard) {
+			init: function(whiteAgentKey, blackAgentKey, customModel) {
 
 				self = this;
 
-				fillChessBoard(customChessBoard);
+				fillChessboard(customModel);
 
 				handleGraphics();
 				handleStates();
@@ -111,9 +137,15 @@ var Chess = Chess || {};
 				stateManager.trigger('startGame');
 			},
 
+			getCopyOfPieces: function() {
+
+				return chess.utils.copyArray(this.pieces);
+			},
+
 			getGraphicManager: function() { return graphicManager; },
 			getStateManager:   function() { return stateManager;   },
 			getAgentManager:   function() { return agentManager;   },
+			getRuleManager:    function() { return ruleManager;    },
 
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak

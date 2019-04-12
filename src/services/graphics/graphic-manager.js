@@ -32,15 +32,13 @@ var Chess = Chess || {};
 		var ratio = 1;
 		var frameSize = 100; 
 		var frames = {
-			king: 1,
-			queen: 2,
-			bishop: 3,
-			rook: 4,
-			knight: 5,
-			pawn: 6,
-		}
-
-		var xPosition = ['A','B','C','D','E','F','G','H'];
+			k: 1,
+			q: 2,
+			b: 3,
+			r: 4,
+			k: 5,
+			p: 6,
+		};
 
 		/*** Private methods ***/
 
@@ -160,44 +158,22 @@ var Chess = Chess || {};
 			pieces[y][x] = element;
 		}
 
-		function createRoyaltyRow(isWhite) {
-
-			let y       = (isWhite) ? 7 : 0;
-			let offset  = (isWhite) ? 1 : 0;
-			let color   = (isWhite) ? "white" : "black";
-
-			createPieceOnCase(0, y, frames['rook'], offset, "left "+color+" rook");
-			createPieceOnCase(1, y, frames['knight'], offset, "left "+color+" knight");
-			createPieceOnCase(2, y, frames['bishop'], offset, "left "+color+" bishop");
-			createPieceOnCase(3, y, frames['queen'], offset, color+" queen");
-			createPieceOnCase(4, y, frames['king'], offset, color+" king");
-			createPieceOnCase(5, y, frames['bishop'], offset, "right "+color+" bishop");
-			createPieceOnCase(6, y, frames['knight'], offset, "right "+color+" knight");
-			createPieceOnCase(7, y, frames['rook'], offset, "right "+color+" rook");
-		}
-
-		function createPawnRow(isWhite) {
-
-			let y       = (isWhite) ? 6 : 1;
-			let offset  = (isWhite) ? 1 : 0;
-			let color   = (isWhite) ? "white" : "black";
-
-			for (let i=0; i<8; i++) {
-				createPieceOnCase(i, y, frames['pawn'], offset, color+" pawn "+Number(i+1));
-			}
-		}
-
 		function createPieces() {
 
-			pieces = new Array(8);
-			for (var i=0; i<8; i++) {
-				pieces[i] = [null, null, null, null, null, null, null, null];
-			}
+			pieces = new Array(8); // init
+			let piecesPositions = controller.pieces;
 
-			createRoyaltyRow(false);
-			createRoyaltyRow(true);
-			createPawnRow(false);
-			createPawnRow(true);
+			for (let y=0; y<8; y++) {
+				pieces[y] = [null, null, null, null, null, null, null, null]; // init
+				for (let x=0; x<8; x++) {
+					let piece = piecesPositions[y][x];
+					if (piece != null) {
+						let frame   = frames[piece[1]];
+						let offset  = (piece[0] === 'w') ? 1 : 0;
+						createPieceOnCase(x, y, frame, offset, piece);
+					}
+				}
+			}
 		}
 
 		function erasePieces() {

@@ -38,13 +38,52 @@ var Chess = Chess || {};
 
 		function activateAgent() {
 
-			if (playerRound == 'white') {
+			if (playerRound == 'w') {
 				currentAgent = whiteAgent;
 				whiteAgent.activate();
 			}
 			else {
 				currentAgent = blackAgent;
 				blackAgent.activate();
+			}
+		}
+
+		/**
+		 * Allowed if case isn't empty 
+		 * and piece belongs to the player
+		 *
+		 * @param  {x,y} pos
+		 * @return null
+		 */
+		function triggerSelectionClick(pos) {
+
+			let pieces = controller.pieces;
+			let piece  = pieces[pos.y][pos.x];
+
+			if (piece != null && piece[0] === playerRound) {
+				currentAgent.pieceSelection(pos);
+			}
+		}
+
+		/**
+		 * Allowed if case is empty
+		 * or piece belongs to the other player
+		 *
+		 * @param  {x,y} pos
+		 * @return null
+		 */
+		function triggerMovementClick(pos) {
+
+			//	la case est vide ou contient une piece ennemie
+			let pieces = controller.pieces;
+			let piece  = pieces[pos.y][pos.x];
+
+			if (piece == null || piece[0] !== playerRound) {
+				currentAgent.caseMovement(pos);
+			}
+			else {
+				//	Cancel selection
+				controller.getStateManager().trigger('cancelSelection');
 			}
 		}
 
@@ -92,10 +131,10 @@ var Chess = Chess || {};
 			beforeAgentInitialized: function() {
 
 				if (playerRound == null) {
-					playerRound = 'white';
+					playerRound = 'w';
 				}
 				else {
-					playerRound = (playerRound == 'white') ? 'black' : 'white';
+					playerRound = (playerRound == 'w') ? 'b' : 'w';
 				}
 				activateAgent();
 			},
@@ -112,10 +151,12 @@ var Chess = Chess || {};
 
 			triggerClick: function(position) {
 
-				//	todo : verify if a piece is on this case and
-				//	       if this piece belongs to current agent
-				
-				currentAgent.pieceSelection(position);
+				if (controller.getStateManager().is('waitSelection')) {
+					triggerSelectionClick(position);
+				}
+				else if (controller.getStateManager().is('waitMovement')) {
+					triggerMovementClick(position);
+				}
 			},
 
 			/**
@@ -125,7 +166,6 @@ var Chess = Chess || {};
 			 */
 			agentSelection: function(position) {
 
-				console.log(position);
 				controller.getStateManager().trigger('selection');
 			},
 
@@ -136,7 +176,7 @@ var Chess = Chess || {};
 			 */
 			agentMovement: function(position) {
 
-				controller.getStateManger().trigger('movement');
+				controller.getStateManager().trigger('movement');
 			},
 
 			/**
