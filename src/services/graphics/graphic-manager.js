@@ -32,7 +32,7 @@ var Chess = Chess || {};
 		var ratio = 1;
 		var frameSize = 100; 
 		var frames = {
-			k: 1,
+			s: 1,
 			q: 2,
 			b: 3,
 			r: 4,

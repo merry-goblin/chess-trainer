@@ -96,7 +96,7 @@ Chess.rules = (function(chess) {
 		let steps = getSteps(origin, dest);
 		steps.x = Math.abs(steps.x);
 		steps.y = Math.abs(steps.y);
-		if (steps.x === 1 || steps.y === 1) {
+		if ((steps.x !== 0 || steps.y !== 0) && steps.x <= 1 && steps.y <= 1) {
 			isAllowed = true;
 		}
 
@@ -222,7 +222,7 @@ Chess.rules = (function(chess) {
 				case 'q':
 					isAllowed = doesQueenMovementIsAllowed(origin, dest);
 					break;
-				case 'k':
+				case 's': // sovereign => king
 					isAllowed = doesKingMovementIsAllowed(origin, dest);
 					break;
 				case 'p':

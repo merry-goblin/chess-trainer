@@ -9,7 +9,7 @@ Chess.config = {
 		b1: 'wk',
 		c1: 'wb',
 		d1: 'wq',
-		e1: 'wk',
+		e1: 'ws',
 		f1: 'wb',
 		g1: 'wk',
 		h1: 'wr',
@@ -36,7 +36,7 @@ Chess.config = {
 		b8: 'bk',
 		c8: 'bb',
 		d8: 'bq',
-		e8: 'bk',
+		e8: 'bs',
 		f8: 'bb',
 		g8: 'bk',
 		h8: 'br'
