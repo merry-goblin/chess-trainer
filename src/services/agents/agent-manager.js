@@ -22,7 +22,7 @@ var Chess = Chess || {};
 		var blackAgent   = null;
 		var currentAgent = null;
 
-		playerRound = null;
+		var playerRound = null;
 
 		/*** Private methods ***/
 
@@ -30,7 +30,6 @@ var Chess = Chess || {};
 
 			let stateManager = controller.getStateManager();
 			stateManager.register('before', 'agentActivated', self.beforeAgentInitialized);
-			stateManager.register('after', 'waitSelection', self.afterWaitSelection);
 
 			whiteAgent.setFunctionToTriggerEvents(self.agentSelection, self.agentMovement);
 			blackAgent.setFunctionToTriggerEvents(self.agentSelection, self.agentMovement);
@@ -139,16 +138,6 @@ var Chess = Chess || {};
 				activateAgent();
 			},
 
-			/**
-			 * Called by an agent
-			 * @param  object position
-			 * @return null
-			 */
-			afterWaitSelection: function() {
-
-				
-			},
-
 			triggerClick: function(position) {
 
 				if (controller.getStateManager().is('waitSelection')) {
@@ -166,7 +155,7 @@ var Chess = Chess || {};
 			 */
 			agentSelection: function(position) {
 
-				controller.getStateManager().trigger('selection');
+				controller.getStateManager().trigger('selection', {selection: position});
 			},
 
 			/**
@@ -176,7 +165,7 @@ var Chess = Chess || {};
 			 */
 			agentMovement: function(position) {
 
-				controller.getStateManager().trigger('movement');
+				controller.getStateManager().trigger('movement', {movement: position});
 			},
 
 			/**

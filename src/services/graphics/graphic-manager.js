@@ -147,7 +147,7 @@ var Chess = Chess || {};
 				title: title
 			});
 
-			layer.addChild(sprite);
+			board.addChild(sprite);
 
 			return sprite;
 		}
@@ -167,7 +167,7 @@ var Chess = Chess || {};
 				pieces[y] = [null, null, null, null, null, null, null, null]; // init
 				for (let x=0; x<8; x++) {
 					let piece = piecesPositions[y][x];
-					if (piece != null) {
+					if (piece !== null) {
 						let frame   = frames[piece[1]];
 						let offset  = (piece[0] === 'w') ? 1 : 0;
 						createPieceOnCase(x, y, frame, offset, piece);
@@ -176,19 +176,28 @@ var Chess = Chess || {};
 			}
 		}
 
+		function removePiece(x,y) {
+
+			if (piece !== null) {
+				piece.remove();
+				pieces[y][x] = null;
+			}
+		}
+
 		function erasePieces() {
 
 			for (var y=0; y<8; y++) {
 				for (var x=0; x<8; x++) {
 					let piece = pieces[y][x];
-					if (piece != null) {
+					if (piece !== null) {
 						piece.remove();
+						pieces[y][x] = null;
 					}
 				}
 			}
 		}
 
-		function movePiece(x1, y1, x2, y2) {
+		function movePiece(x1, y1, x2, y2, type) {
 
 			//	Positions must be in chessboard
 			if (x1 < 0 || x1 >= 8 ||
@@ -199,18 +208,31 @@ var Chess = Chess || {};
 			}
 
 			//	Position 1 must contain a piece
-			if (pieces[y1][x1] == null) {
+			if (pieces[y1][x1] === null) {
 				throw "Not a valid origin";
 			}
 
 			//	Position 2 must be empty
-			if (pieces[y2][x2] != null) {
+			if (pieces[y2][x2] !== null) {
 				throw "Not a valid destination";
 			}
 
 			let piece = pieces[y1][x1];
-			piece.x = x2*frameSize;
-			piece.y = y2*frameSize;
+			let x = x2*frameSize;
+			let y = y2*frameSize;
+
+			//	A lucky pawn become a beautiful queen 
+			if (type !== null) {
+				let newPiece = piece.clone({
+					frame: 2
+				})
+				board.removeChild(piece);
+				board.addChild(newPiece);
+				piece = newPiece;
+			}
+
+			piece.x = x;
+			piece.y = y;
 
 			pieces[y2][x2] = piece;
 			pieces[y1][x1] = null;
@@ -287,9 +309,9 @@ var Chess = Chess || {};
 				this.update();
 			},
 
-			movePiece: function(x1, y1, x2, y2) {
+			movePiece: function(x1, y1, x2, y2, type) {
 
-				movePiece(x1, y1, x2, y2);
+				movePiece(x1, y1, x2, y2, type);
 			},
 
 			removePiece: function(x, y) {

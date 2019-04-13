@@ -70,11 +70,24 @@ var Chess = Chess || {};
 			events[state][event].push(callback);
 		}
 
-		function dispatchStateEvent(event, state, parameters) {
-
+		function dispatchStateEvent(event, state) {
+//console.log("state",event, state);
 			for (let callback of events[state][event]) {
-				callback(parameters);
+				callback();
 			}
+		}
+
+		function dispatchActionEvent(event, action, parameters) {
+
+			let isSuccess = true;
+			for (let callback of events[action][event]) {
+				if (!callback(parameters)) {
+					isSuccess = false;
+					break;
+				}
+			}
+//console.log("action",event, action, isSuccess);
+			return isSuccess;
 		}
 
 		function registerOnEvents() {
@@ -116,17 +129,20 @@ var Chess = Chess || {};
 				registerOnStateEvent(event, state, callback);
 			},
 
-			trigger: function(transition) {
+			trigger: function(transition, parameters) {
 
 				if ((state = stateMachine.isTransitionValid(transition)) != null) {
 
-					//	Before
-					dispatchStateEvent('before', state);
+					if (dispatchActionEvent('on', transition, parameters)) {
 
-					stateMachine.applyTransition(transition);
+						//	Before
+						dispatchStateEvent('before', state);
 
-					//	After
-					dispatchStateEvent('after', state);
+						stateMachine.applyTransition(transition);
+
+						//	After
+						dispatchStateEvent('after', state);
+					}
 				}
 			},
 

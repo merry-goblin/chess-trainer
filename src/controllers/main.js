@@ -91,6 +91,12 @@ var Chess = Chess || {};
 			agentManager.init(self, whiteAgent, blackAgent);
 		}
 
+		function handleRules() {
+
+			ruleManager = new chess.RuleManager();
+			ruleManager.init(self);
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
@@ -133,6 +139,7 @@ var Chess = Chess || {};
 				handleGraphics();
 				handleStates();
 				handleAgents(whiteAgentKey, blackAgentKey);
+				handleRules();
 
 				stateManager.trigger('startGame');
 			},
