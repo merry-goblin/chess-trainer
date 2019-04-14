@@ -10,14 +10,6 @@ var Chess = Chess || {};
 
 Chess.rules = (function(chess) {
 
-	function getSteps(origin, dest) {
-
-		return {
-			x: dest.x - origin.x,
-			y: dest.y - origin.y,
-		}
-	}
-
 	/**
 	 * @param  {x,y}  origin
 	 * @param  {x,y}  dest
@@ -189,9 +181,292 @@ Chess.rules = (function(chess) {
 		return (dest.y === limit);
 	}
 
+	// *******************
+
+	function pieceIsBlocked(pieces, origin, dest, increments) {
+
+		let isBlocked = false;
+		let position = origin;
+
+		if (!pieceHasMoved(position, dest)) {
+			//	Origin can't be equal to dest
+			isBlocked = true;
+		}
+		else {
+			position = getNextPosition(position, increments);
+			while (position.x != dest.x && position.y != dest.y) {
+
+				//	A piece has been encoutered on the path
+				if (pieces[position.y][position.x] != null) {
+					isBlocked = true;
+					break;
+				}
+			}
+		}
+
+		return isBlocked;
+	}
+
+	function pieceHasMoved(origin, dest) {
+
+		let hasMoved = false;
+
+		if (origin.x == dest.x && origin.y == dest.y) {
+			//	Origin can't be equal to dest
+			hasMoved = true;
+		}
+
+		return hasMoved;
+	}
+
+	function moveRookCondition(steps) {
+
+		return ((steps.x === 0 && steps.y !== 0) || (steps.y === 0 && steps.x !== 0));
+	}
+
+	function moveKnightCondition(steps) {
+
+		return ((steps.x === 2 && steps.y === 1) || (steps.x === 1 && steps.y === 2));
+	}
+
+	function moveBishopCondition(steps) {
+
+		return (steps.x === steps.y || steps.x === (steps.y*-1));
+	}
+
+	function moveQueenCondition(steps) {
+
+		return (moveRookCondition(steps) || moveBishopCondition(steps));
+	}
+
+	function moveKingCondition(steps) {
+
+		return ((steps.x <= 1 || steps.x >= -1) && (steps.y <= 1 || steps.y >= -1));
+	}
+
+	function movePawnConditionWithoutPieceTaken(steps, origin, color) {
+
+		let factor = (color === 'b') ? 1 : -1;
+		let start  = (color === 'b') ? 1 : 6;
+		let y = steps.y * factor;
+
+		return (y === 1 || (y === 2 && start == origin.y));
+	}
+
+	function moveRook(pieces, origin, dest) {
+
+		let result     = initResult();
+		let steps      = getSteps(origin, dest);
+		let increments = getIncrement(steps);
+
+		//	Rook movement
+		if (moveRookCondition(steps)) {
+			
+			//	Piece encoutered another piece when moving
+			if (!pieceIsBlocked(pieces, origin, dest, increments)) {
+
+				result = buildResult(result, pieces, origin, dest);
+			}
+		}
+
+		return result;
+	}
+
+	function moveKnight(pieces, origin, dest) {
+
+		let result  = initResult();
+		let steps   = getSteps(origin, dest);
+		steps.x     = Math.abs(steps.x);
+		steps.y     = Math.abs(steps.y);
+
+		//	Knight movement
+		if (moveKnightCondition(steps)) {
+			
+			//	Origin != destination
+			if (!pieceHasMoved(origin, dest)) {
+
+				result = buildResult(result, pieces, origin, dest);
+			}
+		}
+
+		return result;
+	}
+
+	function moveBishop(pieces, origin, dest) {
+
+		let result     = initResult();
+		let steps      = getSteps(origin, dest);
+		let increments = getIncrement(steps);
+
+		//	Bishop movement
+		if (moveBishopCondition(steps)) {
+
+			//	Piece encoutered another piece when moving
+			if (!pieceIsBlocked(pieces, origin, dest, increments)) {
+
+				result = buildResult(result, pieces, origin, dest);
+			}
+		}
+
+		return result;
+	}
+
+	function moveQueen(pieces, origin, dest) {
+
+		let result     = initResult();
+		let steps      = getSteps(origin, dest);
+		let increments = getIncrement(steps);
+
+		//	Bishop movement
+		if (moveQueenCondition(steps)) {
+
+			//	Piece encoutered another piece when moving
+			if (!pieceIsBlocked(pieces, origin, dest, increments)) {
+
+				result = buildResult(result, pieces, origin, dest);
+			}
+		}
+
+		return result;
+	}
+
+	function moveKing(pieces, origin, dest) {
+
+		let result     = initResult();
+		let steps      = getSteps(origin, dest);
+
+		//	Bishop movement
+		if (moveKingCondition(steps)) {
+
+			//	Origin != destination
+			if (!pieceHasMoved(origin, dest)) {
+
+				result = buildResult(result, pieces, origin, dest);
+			}
+		}
+
+		return result;
+	}
+
+	function movePawn(pieces, origin, dest) {
+
+		let result     = initResult();
+		let steps      = getSteps(origin, dest);
+		let color      = pieces[origin.y][origin.x][0];
+
+		//	Origin != destination
+		if (!pieceHasMoved(origin, dest)) {
+
+			//	Bishop movement
+			if (movePawnConditionWithoutPieceTaken(steps, origin, color)) {
+
+				//result = buildResult(result, pieces, origin, dest);
+			}
+			//	Todo
+		}
+
+		return result;
+	}
+
+	function getSteps(origin, dest) {
+
+		return {
+			x: dest.x - origin.x,
+			y: dest.y - origin.y,
+		}
+	}
+
+	function getIncrements(steps) {
+
+		return {
+			x: getIncrement(steps.x),
+			y: getIncrement(steps.y)
+		}
+	}
+
+	function getIncrement(step) {
+
+		let increment = 0;
+		if (step > 0) {
+			increment = 1;
+		}
+		else if (step < 0) {
+			increment = -1;
+		}
+
+		return increment;
+	}
+
+	function getNextPosition(position, increments) {
+
+		return {
+			x: position.x+increments.x,
+			y: position.y+increments.y
+		};
+	}
+
+	function buildResult(result, pieces, dest, origin) {
+
+		if (pieces[dest.y][dest.x] === null) {
+			//	A movement without piece taken
+			result.isAllowed = true;
+		}
+		else if (pieces[origin.y][origin.x][0] != pieces[dest.y][dest.x][0]) {
+			//	A piece is taken of a different color
+			result.isAllowed = true;
+			result.remove.push({ x: dest.x, y: dest.y });
+		}
+		if (result.isAllowed) {
+			result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+		}
+
+		return result;
+	}
+
+	function initResult() {
+
+		let result   = {
+			isAllowed: false,
+			isCheck: false,
+			isCheckmated: false,
+			move: new Array(),
+			remove: new Array()
+		};
+
+		return result;
+	}
+
 	var scope = {
 
 		/*** Public static methods ***/
+
+		movePiece: function(pieces, origin, dest) {
+
+			let result = null;
+
+			switch (type) {
+				case 'r':
+					result = moveRook(pieces, origin, dest);
+					break;
+				case 'k':
+					result = moveKnight(pieces, origin, dest);
+					break;
+				case 'b':
+					result = moveBishop(pieces, origin, dest);
+					break;
+				case 'q':
+					result = moveQueen(pieces, origin, dest);
+					break;
+				case 's': // sovereign => king
+					result = moveKing(pieces, origin, dest);
+					break;
+				case 'p':
+					result = movePawn(pieces, origin, dest);
+					break;
+			}
+
+			return result;
+		},
 
 		/**
 		 * Check if the movement is allowed in an empty chessboard.
