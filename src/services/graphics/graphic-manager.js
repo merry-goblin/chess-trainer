@@ -168,8 +168,8 @@ var Chess = Chess || {};
 				for (let x=0; x<8; x++) {
 					let piece = piecesPositions[y][x];
 					if (piece !== null) {
-						let frame   = frames[piece[1]];
-						let offset  = (piece[0] === 'w') ? 1 : 0;
+						let frame   = frames[piece.type];
+						let offset  = (piece.color === 'w') ? 1 : 0;
 						createPieceOnCase(x, y, frame, offset, piece);
 					}
 				}

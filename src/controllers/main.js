@@ -63,10 +63,21 @@ var Chess = Chess || {};
 
 			for (positionLabel in model) {
 				let pos    = chess.utils.convertToArrayPosition(positionLabel);
-				let piece  = model[positionLabel];
+				let piece  = createPiece(model[positionLabel]);
 
 				self.pieces[pos.y][pos.x] = piece;
 			}
+		}
+
+		function createPiece(label) {
+
+			let piece = new chess.Piece();
+
+			piece.color = label[0];
+			piece.type  = label[1];
+			piece.last  = 0;
+
+			return piece;
 		}
 
 		function handleGraphics() {

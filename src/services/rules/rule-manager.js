@@ -50,7 +50,7 @@ var Chess = Chess || {};
 				pieces[move.y2][move.x2] = pieces[move.y1][move.x1];
 				pieces[move.y1][move.x1] = null;
 				if (type != null) {
-					pieces[move.y2][move.x2] = pieces[move.y2][move.x2][0]+type;
+					pieces[move.y2][move.x2].type = type;
 				}
 				controller.getGraphicManager().movePiece(move.x1, move.y1, move.x2, move.y2, type);
 			}
@@ -126,12 +126,12 @@ var Chess = Chess || {};
 						// Basic movement without piece taken
 						isAllowed = true;
 						let move = { x1: selection.x, y1: selection.y, x2: movement.x, y2: movement.y };
-						if (pieceSelection[1] === 'p' && chess.rules.doesPawnReachedTheBorder(pieceSelection, movement)) {
+						if (pieceSelection.type === 'p' && chess.rules.doesPawnReachedTheBorder(pieceSelection, movement)) {
 							move['type'] = 'q';
 						}
 						changes.move.push(move);
 					}
-					else if (pieceMovement[0] !== pieceSelection[0] && pieceSelection[1] !== 'p') {
+					else if (pieceMovement.color !== pieceSelection.color && pieceSelection.type !== 'p') {
 						// Basic movement with a piece taken. Doesn't handle pawns
 						isAllowed = true;
 						changes.remove.push({ x: movement.x, y: movement.y });
@@ -141,7 +141,7 @@ var Chess = Chess || {};
 				else {
 
 					//	Specific movements
-					if (pieceSelection[1] === 'p') {
+					if (pieceSelection.type === 'p') {
 						let pieceToTake = null;
 						let move = null;
 						if (chess.rules.doesPawnTakesAPiece(pieceSelection, pieceMovement, selection, movement)) {

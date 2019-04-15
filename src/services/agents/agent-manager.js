@@ -59,7 +59,7 @@ var Chess = Chess || {};
 			let pieces = controller.pieces;
 			let piece  = pieces[pos.y][pos.x];
 
-			if (piece != null && piece[0] === playerRound) {
+			if (piece != null && piece.color === playerRound) {
 				currentAgent.pieceSelection(pos);
 			}
 		}
@@ -77,7 +77,7 @@ var Chess = Chess || {};
 			let pieces = controller.pieces;
 			let piece  = pieces[pos.y][pos.x];
 
-			if (piece == null || piece[0] !== playerRound) {
+			if (piece == null || piece.color !== playerRound) {
 				currentAgent.caseMovement(pos);
 			}
 			else {

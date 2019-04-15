@@ -360,7 +360,7 @@ Chess.rules = (function(chess) {
 
 		let result     = initResult();
 		let steps      = getSteps(origin, dest);
-		let color      = pieces[origin.y][origin.x][0];
+		let color      = pieces[origin.y][origin.x].color;
 
 		//	Origin != destination
 		if (pieceHasMoved(origin, dest)) {
@@ -422,7 +422,7 @@ Chess.rules = (function(chess) {
 			//	A movement without piece taken
 			result.isAllowed = true;
 		}
-		else if (pieces[origin.y][origin.x][0] != pieces[dest.y][dest.x][0]) {
+		else if (pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
 			//	A piece is taken of a different color
 			result.isAllowed = true;
 			result.remove.push({ x: dest.x, y: dest.y });
@@ -446,7 +446,7 @@ Chess.rules = (function(chess) {
 
 	function buildResultTakeOnly(result, pieces, origin, dest) {
 
-		if (pieces[dest.y][dest.x] !== null && pieces[origin.y][origin.x][0] != pieces[dest.y][dest.x][0]) {
+		if (pieces[dest.y][dest.x] !== null && pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
 			//	A piece is taken of a different color
 			result.isAllowed = true;
 			result.remove.push({ x: dest.x, y: dest.y });
@@ -477,7 +477,7 @@ Chess.rules = (function(chess) {
 
 			let result = null;
 
-			switch (pieces[origin.y][origin.x][1]) {
+			switch (pieces[origin.y][origin.x].type) {
 				case 'r':
 					result = moveRook(pieces, origin, dest);
 					break;
@@ -514,10 +514,8 @@ Chess.rules = (function(chess) {
 		doesBasicPieceMovementIsAllowed: function(piece, origin, dest) {
 
 			let isAllowed = false;
-			let type  = piece[1];
-			let color = piece[0];
 
-			switch (type) {
+			switch (piece.type) {
 				case 'r':
 					isAllowed = doesRookMovementIsAllowed(origin, dest);
 					break;
@@ -534,7 +532,7 @@ Chess.rules = (function(chess) {
 					isAllowed = doesKingMovementIsAllowed(origin, dest);
 					break;
 				case 'p':
-					isAllowed = doesPawnMovementIsAllowed(origin, dest, color);
+					isAllowed = doesPawnMovementIsAllowed(origin, dest, piece.color);
 					break;
 			}
 
@@ -551,11 +549,11 @@ Chess.rules = (function(chess) {
 		doesPawnTakesAPiece: function(pieceSelection, pieceMovement, origin, dest) {
 
 			let isAllowed = false;
-			let color = pieceSelection[0];
+			let color = pieceSelection.color;
 
 			if (doesPawnMoveToTakeAPiece(origin, dest, color)) {
 				if (pieceMovement !== null) {
-					if (pieceSelection[0] !== pieceMovement[0]) {
+					if (pieceSelection.color !== pieceMovement.color) {
 						isAllowed = true;
 					}
 				}
@@ -575,13 +573,13 @@ Chess.rules = (function(chess) {
 		doesPawnTakesAPieceWithEnPassant: function(pieces, pieceSelection, pieceMovement, origin, dest) {
 
 			let pieceToTakePosition = false;
-			let color = pieceSelection[0];
+			let color = pieceSelection.color;
 
 			if (doesPawnMoveToTakeAPiece(origin, dest, color)) {
 				if (pieceMovement === null) {
 					pieceToTakePosition = getPawnTakenPositionWithEnPassant(dest, color);
 					let pieceToTake = pieces[pieceToTakePosition.y][pieceToTakePosition.x];
-					if (pieceToTakePosition === null || pieceSelection[0] === pieceToTake[0]) {
+					if (pieceToTakePosition === null || pieceSelection.color === pieceToTake.color) {
 						pieceToTakePosition = false;
 					}
 				}
@@ -592,7 +590,7 @@ Chess.rules = (function(chess) {
 
 		doesPawnReachedTheBorder: function(piece, dest) {
 
-			let color = piece[0];
+			let color = piece.color;
 
 			return doesPawnReachedTheBorder(dest , color);
 		}
