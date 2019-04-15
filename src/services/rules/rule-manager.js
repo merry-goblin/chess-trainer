@@ -89,6 +89,23 @@ var Chess = Chess || {};
 
 			onMovement: function(parameters) {
 
+				movement  = parameters.movement;
+				let pieces  = controller.pieces;
+				let result  = chess.rules.movePiece(pieces, selection, movement);
+
+				if (result.isAllowed) {
+					applyPiecesChanges(result);
+				}
+				else {
+					//	Cancel selection
+					controller.getStateManager().trigger('cancelSelection');
+				}
+
+				return result.isAllowed;
+			},
+
+			onMovementOld: function(parameters) {
+
 				let isAllowed = false;
 				let isBasicMovementAllowed = false;
 
