@@ -10,179 +10,6 @@ var Chess = Chess || {};
 
 Chess.rules = (function(chess) {
 
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesRookMovementIsAllowed(origin, dest) {
-
-		let isAllowed = false;
-		let steps = getSteps(origin, dest);
-		if ((steps.x === 0 && steps.y !== 0) || (steps.y === 0 && steps.x !== 0)) {
-			isAllowed = true;
-		}
-
-		return isAllowed;
-	}
-
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesKnightMovementIsAllowed(origin, dest) {
-
-		let isAllowed = false;
-		let steps = getSteps(origin, dest);
-		steps.x = Math.abs(steps.x);
-		steps.y = Math.abs(steps.y);
-		if ((steps.x === 2 && steps.y === 1) || (steps.x === 1 && steps.y === 2)) {
-			isAllowed = true;
-		}
-
-		return isAllowed;
-	}
-
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesBishopMovementIsAllowed(origin, dest) {
-
-		let isAllowed = false;
-		let steps = getSteps(origin, dest);
-		if (steps.x !== 0) {
-			if (steps.x === steps.y || steps.x === (steps.y*-1)) {
-				isAllowed = true;
-			}
-		}
-
-		return isAllowed;
-	}
-
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesQueenMovementIsAllowed(origin, dest) {
-
-		let isAllowed = false;
-		if (doesBishopMovementIsAllowed(origin, dest) || doesRookMovementIsAllowed(origin, dest)) {
-			isAllowed = true;
-		}
-
-		return isAllowed;
-	}
-
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesKingMovementIsAllowed(origin, dest) {
-
-		let isAllowed = false;
-		let steps = getSteps(origin, dest);
-		steps.x = Math.abs(steps.x);
-		steps.y = Math.abs(steps.y);
-		if ((steps.x !== 0 || steps.y !== 0) && steps.x <= 1 && steps.y <= 1) {
-			isAllowed = true;
-		}
-
-		return isAllowed;
-	}
-
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesPawnMovementIsAllowed(origin, dest, color) {
-
-		let isAllowed = false;
-		if (origin.x === dest.x) {
-			let factor = (color === 'b') ? 1 : -1;
-			let step   = (dest.y-origin.y) * factor;
-			if (step === 1) {
-				isAllowed = true;
-			}
-			else if (step === 2) {
-				if ((color === 'w' && origin.y == 6) || (color === 'b' && origin.y === 1)) {
-					isAllowed = true;
-				}
-			}
-		}
-
-		return isAllowed;
-	}
-
-	/**
-	 * @param  {x,y}  origin
-	 * @param  {x,y}  dest
-	 * @return boolean
-	 */
-	function doesPawnTakesAPiece(origin, dest, color) {
-
-		let isAllowed = false;
-		let steps = getSteps(origin, dest);
-		if (origin.x === dest.x+1 || origin.x === dest.x-1) {
-
-		}
-
-		if (origin.x === dest.x) {
-			let factor = (color === 'b') ? 1 : -1;
-			let step   = (dest.y-origin.y) * factor;
-			if (step === 1) {
-				isAllowed = true;
-			}
-			else if (step === 2) {
-				if ((color === 'w' && origin.y === 6) || (color === 'b' && origin.y === 1)) {
-					isAllowed = true;
-				}
-			}
-		}
-
-		return isAllowed;
-	}
-
-	function doesPawnMoveToTakeAPiece(origin, dest, color) {
-
-		let isAllowed = false;
-		let steps = getSteps(origin, dest);
-		if (Math.abs(steps.x) == 1) {
-			let factor = (color === 'b') ? 1 : -1;
-			let step   = (steps.y) * factor;
-			if (step === 1) {
-				isAllowed = true;
-			}
-		}
-
-		return isAllowed;
-	}
-
-	function getPawnTakenPositionWithEnPassant(dest, color) {
-
-		let factor = (color === 'b') ? -1 : 1;
-		let y = dest.y + factor;
-
-		return {
-			x: dest.x,
-			y: y
-		};
-	}
-
-	function doesPawnReachedTheBorder(dest , color) {
-
-		let limit = (color === 'b') ? 7 : 0;
-
-		return (dest.y === limit);
-	}
-
-	// *******************
-
 	function pieceIsBlocked(pieces, origin, dest, increments) {
 
 		let isBlocked = false;
@@ -242,6 +69,13 @@ Chess.rules = (function(chess) {
 	function moveKingCondition(steps) {
 
 		return (steps.x <= 1 && steps.x >= -1 && steps.y <= 1 && steps.y >= -1);
+	}
+
+	function castlingCondition(steps, origin, color) {
+
+		//	todo
+
+		return false;
 	}
 
 	function movePawnConditionWithoutPieceTaken(steps, origin, color) {
@@ -340,27 +174,32 @@ Chess.rules = (function(chess) {
 
 	function moveKing(pieces, origin, dest) {
 
-		let result     = initResult();
-		let steps      = getSteps(origin, dest);
+		let result  = initResult();
+		let steps   = getSteps(origin, dest);
+		let color   = pieces[origin.y][origin.x].color;
 
-		//	Bishop movement
-		if (moveKingCondition(steps)) {
+		//	Origin != destination
+		if (pieceHasMoved(origin, dest)) {
 
-			//	Origin != destination
-			if (pieceHasMoved(origin, dest)) {
+			//	Bishop movement
+			if (moveKingCondition(steps)) {
 
 				result = buildResult(result, pieces, origin, dest);
+			}
+			else if (castlingCondition(steps, origin, color)) {
+
+				result = buildResultKingCastling(result, pieces, origin, dest);
 			}
 		}
 
 		return result;
 	}
 
-	function movePawn(pieces, origin, dest) {
+	function movePawn(pieces, origin, dest, roundIndex) {
 
-		let result     = initResult();
-		let steps      = getSteps(origin, dest);
-		let color      = pieces[origin.y][origin.x].color;
+		let result  = initResult();
+		let steps   = getSteps(origin, dest);
+		let color   = pieces[origin.y][origin.x].color;
 
 		//	Origin != destination
 		if (pieceHasMoved(origin, dest)) {
@@ -368,11 +207,11 @@ Chess.rules = (function(chess) {
 			//	Bishop movement
 			if (movePawnConditionWithoutPieceTaken(steps, origin, color)) {
 
-				result = buildResultMoveOnly(result, pieces, origin, dest);
+				result = buildResultPawnMoveOnly(result, pieces, origin, dest, color);
 			}
 			else if (movePawnConditionWithPieceTaken(steps, color)) {
 
-				result = buildResultTakeOnly(result, pieces, origin, dest);
+				result = buildResultPawnTakeOnly(result, pieces, origin, dest, color, roundIndex);
 			}
 		}
 
@@ -434,24 +273,46 @@ Chess.rules = (function(chess) {
 		return result;
 	}
 
-	function buildResultMoveOnly(result, pieces, origin, dest) {
+	function buildResultPawnMoveOnly(result, pieces, origin, dest, color) {
+
+		let border = (color === 'w')     ? 0  : 8;
+		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
 
 		if (pieces[dest.y][dest.x] === null) {
 			result.isAllowed = true;
-			result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+			result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y, type: type });
 		}
 
 		return result;
 	}
 
-	function buildResultTakeOnly(result, pieces, origin, dest) {
+	function buildResultPawnTakeOnly(result, pieces, origin, dest, color, roundIndex) {
 
-		if (pieces[dest.y][dest.x] !== null && pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
-			//	A piece is taken of a different color
-			result.isAllowed = true;
-			result.remove.push({ x: dest.x, y: dest.y });
-			result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+		if (pieces[dest.y][dest.x] !== null) {
+			if (pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
+				//	A piece is taken of a different color
+				result.isAllowed = true;
+				result.remove.push({ x: dest.x, y: dest.y });
+				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+			}
 		}
+		else {
+			//	En passant
+			let decrement = (color === 'w') ? 1 : -1;
+			let taken     = pieces[dest.y+decrement][dest.x];console.log(taken, roundIndex);
+			if (taken !== null && taken.hasRushed && taken.last === (roundIndex-1)) {
+				//	En passant succeed
+				result.isAllowed = true;
+				result.remove.push({ x: dest.x, y: dest.y+decrement });
+				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+			}
+		}
+
+
+		return result;
+	}
+
+	function buildResultKingCastling(result, pieces, origin, dest) {
 
 		return result;
 	}
@@ -473,7 +334,7 @@ Chess.rules = (function(chess) {
 
 		/*** Public static methods ***/
 
-		movePiece: function(pieces, origin, dest) {
+		movePiece: function(pieces, origin, dest, roundIndex) {
 
 			let result = null;
 
@@ -494,106 +355,13 @@ Chess.rules = (function(chess) {
 					result = moveKing(pieces, origin, dest);
 					break;
 				case 'p':
-					result = movePawn(pieces, origin, dest);
+					result = movePawn(pieces, origin, dest, roundIndex);
 					break;
 			}
 
 			return result;
-		},
-
-		/**
-		 * Check if the movement is allowed in an empty chessboard.
-		 * Capture is not tested in this function, if false is returned
-		 * it doesn't mean that the movement isn't allowed
-		 * 
-		 * @param  string piece
-		 * @param  {x,y}  origin
-		 * @param  {x,y}  dest
-		 * @return boolean
-		 */
-		doesBasicPieceMovementIsAllowed: function(piece, origin, dest) {
-
-			let isAllowed = false;
-
-			switch (piece.type) {
-				case 'r':
-					isAllowed = doesRookMovementIsAllowed(origin, dest);
-					break;
-				case 'k':
-					isAllowed = doesKnightMovementIsAllowed(origin, dest);
-					break;
-				case 'b':
-					isAllowed = doesBishopMovementIsAllowed(origin, dest);
-					break;
-				case 'q':
-					isAllowed = doesQueenMovementIsAllowed(origin, dest);
-					break;
-				case 's': // sovereign => king
-					isAllowed = doesKingMovementIsAllowed(origin, dest);
-					break;
-				case 'p':
-					isAllowed = doesPawnMovementIsAllowed(origin, dest, piece.color);
-					break;
-			}
-
-			return isAllowed;
-		},
-
-		/**
-		 * @param  string pieceSelection
-		 * @param  string pieceMovement
-		 * @param  {x,y}  origin
-		 * @param  {x,y}  dest
-		 * @return boolean
-		 */
-		doesPawnTakesAPiece: function(pieceSelection, pieceMovement, origin, dest) {
-
-			let isAllowed = false;
-			let color = pieceSelection.color;
-
-			if (doesPawnMoveToTakeAPiece(origin, dest, color)) {
-				if (pieceMovement !== null) {
-					if (pieceSelection.color !== pieceMovement.color) {
-						isAllowed = true;
-					}
-				}
-			}
-
-			return isAllowed;
-		},
-
-		/**
-		 * @param  array  pieces
-		 * @param  string pieceSelection
-		 * @param  string pieceMovement
-		 * @param  {x,y}  origin
-		 * @param  {x,y}  dest
-		 * @return {x,y} | false
-		 */
-		doesPawnTakesAPieceWithEnPassant: function(pieces, pieceSelection, pieceMovement, origin, dest) {
-
-			let pieceToTakePosition = false;
-			let color = pieceSelection.color;
-
-			if (doesPawnMoveToTakeAPiece(origin, dest, color)) {
-				if (pieceMovement === null) {
-					pieceToTakePosition = getPawnTakenPositionWithEnPassant(dest, color);
-					let pieceToTake = pieces[pieceToTakePosition.y][pieceToTakePosition.x];
-					if (pieceToTakePosition === null || pieceSelection.color === pieceToTake.color) {
-						pieceToTakePosition = false;
-					}
-				}
-			}
-
-			return pieceToTakePosition;
-		},
-
-		doesPawnReachedTheBorder: function(piece, dest) {
-
-			let color = piece.color;
-
-			return doesPawnReachedTheBorder(dest , color);
 		}
+
 	}
 	return scope;
 

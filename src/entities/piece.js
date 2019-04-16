@@ -9,7 +9,8 @@ var Chess = Chess || {};
 
 Chess.Piece = function() {
 
-	this.color = null;
-	this.type  = null;
-	this.last  = null; // Index of last move
+	this.color     = null;
+	this.type      = null;
+	this.last      = null; // Index of last move
+	this.hasRushed = false;
 };

@@ -19,8 +19,9 @@ var Chess = Chess || {};
 
 		var controller = null;
 
-		var selection = null;
-		var movement  = null;
+		var selection  = null;
+		var movement   = null;
+		var roundIndex = 0;
 
 		/*** Private methods ***/
 
@@ -30,6 +31,20 @@ var Chess = Chess || {};
 			stateManager.register('on', 'selection', self.onSelection);
 			stateManager.register('on', 'movement', self.onMovement);
 			stateManager.register('after', 'agentDesactivated', self.afterAgentDesactivated);
+			stateManager.register('before', 'agentActivated', self.beforeAgentActivated);
+		}
+
+		function hasRushed(piece, y1, y2) {
+
+			let result = false;
+
+			if (piece.type === 'p') {
+				let factor  = (piece.color === 'b') ? 1 : -1;
+				let y       = (y2 - y1) * factor;
+				result      = (y == 2) ? true : false;
+			}
+
+			return result;
 		}
 
 		/**
@@ -49,6 +64,10 @@ var Chess = Chess || {};
 				let type = (move.type == null) ? null : move.type;
 				pieces[move.y2][move.x2] = pieces[move.y1][move.x1];
 				pieces[move.y1][move.x1] = null;
+				pieces[move.y2][move.x2].last = roundIndex;
+				if (!pieces[move.y2][move.x2].hasRushed) {
+					pieces[move.y2][move.x2].hasRushed = hasRushed(pieces[move.y2][move.x2], move.y1, move.y2);
+				}
 				if (type != null) {
 					pieces[move.y2][move.x2].type = type;
 				}
@@ -80,6 +99,11 @@ var Chess = Chess || {};
 				registerOnEvents();
 			},
 
+			getRoundIndex: function() {
+
+				return roundIndex;
+			},
+
 			onSelection: function(parameters) {
 
 				selection = parameters.selection;
@@ -91,7 +115,7 @@ var Chess = Chess || {};
 
 				movement  = parameters.movement;
 				let pieces  = controller.pieces;
-				let result  = chess.rules.movePiece(pieces, selection, movement);
+				let result  = chess.rules.movePiece(pieces, selection, movement, roundIndex);
 
 				if (result.isAllowed) {
 					applyPiecesChanges(result);
@@ -104,80 +128,9 @@ var Chess = Chess || {};
 				return result.isAllowed;
 			},
 
-			onMovementOld: function(parameters) {
+			beforeAgentActivated: function() {
 
-				let isAllowed = false;
-				let isBasicMovementAllowed = false;
-
-				let changes   = {
-					move: new Array(),
-					remove: new Array()
-				};
-
-				movement  = parameters.movement;
-				let pieces          = controller.pieces;
-				let pieceSelection  = pieces[selection.y][selection.x];
-				let pieceMovement   = pieces[movement.y][movement.x];
-
-				//	Basic movement
-				if (chess.rules.doesBasicPieceMovementIsAllowed(pieceSelection, selection, movement)) {
-
-					if (pieceMovement === null) {
-						// Basic movement without piece taken
-						isAllowed = true;
-						let move = { x1: selection.x, y1: selection.y, x2: movement.x, y2: movement.y };
-						if (pieceSelection.type === 'p' && chess.rules.doesPawnReachedTheBorder(pieceSelection, movement)) {
-							move['type'] = 'q';
-						}
-						changes.move.push(move);
-					}
-					else if (pieceMovement.color !== pieceSelection.color && pieceSelection.type !== 'p') {
-						// Basic movement with a piece taken. Doesn't handle pawns
-						isAllowed = true;
-						changes.remove.push({ x: movement.x, y: movement.y });
-						changes.move.push({ x1: selection.x, y1: selection.y, x2: movement.x, y2: movement.y });
-					}
-				}
-				else {
-
-					//	Specific movements
-					if (pieceSelection.type === 'p') {
-						let pieceToTake = null;
-						let move = null;
-						if (chess.rules.doesPawnTakesAPiece(pieceSelection, pieceMovement, selection, movement)) {
-							isAllowed = true;
-							changes.remove.push({ x: movement.x, y: movement.y });
-							move = { x1: selection.x, y1: selection.y, x2: movement.x, y2: movement.y };
-						}
-						else {
-							pieceToTake = chess.rules.doesPawnTakesAPieceWithEnPassant(pieces, pieceSelection, pieceMovement, selection, movement);
-							if (pieceToTake !== false) {
-								isAllowed = true;
-								changes.remove.push({ x: pieceToTake.x, y: pieceToTake.y });
-								move = { x1: selection.x, y1: selection.y, x2: movement.x, y2: movement.y };
-							}
-						}
-						if (move !== null) {
-							if (chess.rules.doesPawnReachedTheBorder(pieceSelection, movement)) {
-								move.type = 'q';
-							}
-							changes.move.push(move);
-						}
-					}
-					/*else if (pieceSelection[1] === 'k') {
-
-					}*/
-				}
-
-				if (isAllowed) {
-					applyPiecesChanges(changes);
-				}
-				else {
-					//	Cancel selection
-					controller.getStateManager().trigger('cancelSelection');
-				}
-
-				return isAllowed;
+				roundIndex++;
 			},
 
 			afterAgentDesactivated: function() {
