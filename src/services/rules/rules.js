@@ -73,9 +73,9 @@ Chess.rules = (function(chess) {
 
 	function castlingCondition(steps, origin, color) {
 
-		//	todo
+		let y = (color === 'b') ? 0 : 7;
 
-		return false;
+		return (y === origin.y && (steps.x === -2 || steps.x === 2));
 	}
 
 	function movePawnConditionWithoutPieceTaken(steps, origin, color) {
@@ -299,7 +299,7 @@ Chess.rules = (function(chess) {
 		else {
 			//	En passant
 			let decrement = (color === 'w') ? 1 : -1;
-			let taken     = pieces[dest.y+decrement][dest.x];console.log(taken, roundIndex);
+			let taken     = pieces[dest.y+decrement][dest.x];
 			if (taken !== null && taken.hasRushed && taken.last === (roundIndex-1)) {
 				//	En passant succeed
 				result.isAllowed = true;
@@ -313,6 +313,11 @@ Chess.rules = (function(chess) {
 	}
 
 	function buildResultKingCastling(result, pieces, origin, dest) {
+
+
+		if (pieces[dest.y][dest.x] === null) {
+			
+		}
 
 		return result;
 	}
