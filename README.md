@@ -13,7 +13,7 @@ git clone merry-goblin/chess-trainer
 
 open index.html in a web browser to start playing
 
-### SampleCustom placement of pieces
+### Sample
 
 **/index.html :**
 ```
