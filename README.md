@@ -15,6 +15,8 @@ open index.html in a web browser to start playing
 
 ### SampleCustom placement of pieces
 
+**/index.html :**
+```
 <script src="./vendor/jquery/jquery-3.3.0.min.js"></script>
 <script src="./vendor/ocanvas/ocanvas-2.10.0.js"></script>
 <script src="./config/app.js"></script>
@@ -29,8 +31,6 @@ open index.html in a web browser to start playing
 <script src="./src/services/agents/player-agent.js"></script>
 <script src="./src/controllers/main.js"></script>
 
-**/index.html :**
-```
 <script>
 
 	(function($, chess) {
@@ -45,6 +45,7 @@ open index.html in a web browser to start playing
 	})(jQuery, Chess);
 
 </script>
+```
 
 ### Sample (Custom placement of pieces)
 
