@@ -32,11 +32,11 @@ var Chess = Chess || {};
 		var ratio = 1;
 		var frameSize = 100; 
 		var frames = {
-			s: 1,
+			k: 1,
 			q: 2,
 			b: 3,
 			r: 4,
-			k: 5,
+			n: 5,
 			p: 6,
 		};
 

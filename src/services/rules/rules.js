@@ -312,11 +312,66 @@ Chess.rules = (function(chess) {
 		return result;
 	}
 
+	function getRookPositionOnCastling(dest) {
+
+		let rookPosition = { 
+			x: null, 
+			y: dest.y 
+		};
+		rookPosition.x = (dest.x === 2) ? 0 : 7;
+
+		return rookPosition;
+	}
+
+	function doesPieceIsValidOnCastling(pieces, position, type) {
+
+		let isValid = false;
+		let piece   = pieces[position.y][position.x];
+		if (piece !== null && piece.type === type) {
+			if (piece.last === 0) {
+				isValid = true;
+			}
+		}
+
+		return isValid;
+	}
+
+	function doesPathIsFreeOnCastling(pieces, kingPosition, rookPosition) {
+
+		let isPathFree = true;
+		let start  = (rookPosition.x === 0) ? 1 : 5;
+		let end    = (rookPosition.x === 0) ? 3 : 6;
+		let y      = kingPosition.y;
+
+		for (let x = start; x <= end; x++) {
+			let piece = pieces[y][x];
+			if (piece !== null) {
+				isPathFree = false;
+				break;
+			}
+		}
+
+		return isPathFree;
+	}
+
 	function buildResultKingCastling(result, pieces, origin, dest) {
 
+		let rookPosition   = getRookPositionOnCastling(dest);
 
-		if (pieces[dest.y][dest.x] === null) {
-			
+		if (doesPieceIsValidOnCastling(pieces, rookPosition, 'r') &&
+			doesPieceIsValidOnCastling(pieces, origin, 'k')) {
+
+			if (doesPathIsFreeOnCastling(pieces, origin, rookPosition)) {
+
+				//	Todo : king check is forbidden on any case of the king journey 
+				//	including the start position and obviously the destination
+
+				let rookDestinationY = (rookPosition.x === 0) ? 3 : 5;
+
+				result.isAllowed = true;
+				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+				result.move.push({ x1: rookPosition.x, y1: rookPosition.y, x2: rookDestinationY, y2: rookPosition.y });
+			}
 		}
 
 		return result;
@@ -347,7 +402,7 @@ Chess.rules = (function(chess) {
 				case 'r':
 					result = moveRook(pieces, origin, dest);
 					break;
-				case 'k':
+				case 'n': // knight
 					result = moveKnight(pieces, origin, dest);
 					break;
 				case 'b':
@@ -356,7 +411,7 @@ Chess.rules = (function(chess) {
 				case 'q':
 					result = moveQueen(pieces, origin, dest);
 					break;
-				case 's': // sovereign => king
+				case 'k':
 					result = moveKing(pieces, origin, dest);
 					break;
 				case 'p':

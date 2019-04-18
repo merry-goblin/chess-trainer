@@ -6,12 +6,12 @@ Chess.config = {
 	loopInterval: 41,
 	defaultModel: {
 		a1: 'wr',
-		b1: 'wk',
+		b1: 'wn',
 		c1: 'wb',
 		d1: 'wq',
-		e1: 'ws',
+		e1: 'wk',
 		f1: 'wb',
-		g1: 'wk',
+		g1: 'wn',
 		h1: 'wr',
 
 		a2: 'wp',
@@ -33,12 +33,12 @@ Chess.config = {
 		h7: 'bp',
 
 		a8: 'br',
-		b8: 'bk',
+		b8: 'bn',
 		c8: 'bb',
 		d8: 'bq',
-		e8: 'bs',
+		e8: 'bk',
 		f8: 'bb',
-		g8: 'bk',
+		g8: 'bn',
 		h8: 'br'
 	}
 }
