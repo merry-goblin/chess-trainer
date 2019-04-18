@@ -137,7 +137,7 @@ var Chess = Chess || {};
 			let sprite = canvas.display.sprite({
 				x: x*frameSize,
 				y: y*frameSize,
-				image: "assets/svg/chess-pieces.svg",
+				image: "assets/images/chess-pieces.svg",
 				generate: true,
 				width: frameSize,
 				height: frameSize,
