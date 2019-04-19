@@ -42,6 +42,12 @@ var Chess = Chess || {};
 
 		/*** Private methods ***/
 
+		function registerOnEvents() {
+
+			let stateManager = controller.getStateManager();
+			stateManager.register('after', 'agentActivated', self.afterAgentInitialized);
+		}
+
 		function initOCanvas() {
 
 			var boardDomElement = document.getElementById(chessboardId);
@@ -257,6 +263,14 @@ var Chess = Chess || {};
 			pieces[y][x] = null;
 		}
 
+		function changePlayerColor(playerColor) {
+
+			let color = (playerColor === 'w') ? 'white' : 'black';
+
+			let $playerColor = $("#chessboardId").closest(".chess-board-container").find(".player-color");
+			$playerColor.css("background-color", color);
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
@@ -298,6 +312,8 @@ var Chess = Chess || {};
 
 				initUI();
 
+				registerOnEvents();
+
 				this.update();
 			},
 
@@ -327,6 +343,12 @@ var Chess = Chess || {};
 			update: function() {
 
 				canvas.redraw();
+			},
+
+			afterAgentInitialized: function() {
+
+				let playerColor = controller.getAgentManager().getPlayerColor();
+				changePlayerColor(playerColor);
 			},
 
 			/**

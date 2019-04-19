@@ -168,6 +168,11 @@ var Chess = Chess || {};
 				controller.getStateManager().trigger('movement', {movement: position});
 			},
 
+			getPlayerColor: function() {
+
+				return playerRound;
+			},
+
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak
 			 * @return null
