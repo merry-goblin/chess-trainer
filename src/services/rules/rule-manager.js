@@ -95,6 +95,9 @@ var Chess = Chess || {};
 				self = this;
 
 				controller = controllerParam;
+			},
+
+			initEventRegistering: function() {
 
 				registerOnEvents();
 			},

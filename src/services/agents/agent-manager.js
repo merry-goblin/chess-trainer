@@ -119,6 +119,9 @@ var Chess = Chess || {};
 				controller = controllerParam;
 				whiteAgent = whiteAgentParam;
 				blackAgent = blackAgentParam;
+			},
+
+			initEventRegistering: function() {
 
 				registerOnEvents();
 			},

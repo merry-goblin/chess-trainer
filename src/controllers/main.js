@@ -108,6 +108,14 @@ var Chess = Chess || {};
 			ruleManager.init(self);
 		}
 
+		function eventRegistering() {
+
+			stateManager.initEventRegistering();
+			ruleManager.initEventRegistering();
+			agentManager.initEventRegistering();
+			graphicManager.initEventRegistering();
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
@@ -147,10 +155,12 @@ var Chess = Chess || {};
 
 				fillChessboard(customModel);
 
-				handleGraphics();
 				handleStates();
-				handleAgents(whiteAgentKey, blackAgentKey);
 				handleRules();
+				handleAgents(whiteAgentKey, blackAgentKey);
+				handleGraphics();
+
+				eventRegistering();
 
 				stateManager.trigger('startGame');
 			},
@@ -160,10 +170,10 @@ var Chess = Chess || {};
 				return chess.utils.copyArray(this.pieces);
 			},
 
-			getGraphicManager: function() { return graphicManager; },
 			getStateManager:   function() { return stateManager;   },
-			getAgentManager:   function() { return agentManager;   },
 			getRuleManager:    function() { return ruleManager;    },
+			getAgentManager:   function() { return agentManager;   },
+			getGraphicManager: function() { return graphicManager; },
 
 			/**
 			 * Use this when Destroying this object in order to prevent for memory leak

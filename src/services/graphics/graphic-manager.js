@@ -267,8 +267,14 @@ var Chess = Chess || {};
 
 			let color = (playerColor === 'w') ? 'white' : 'black';
 
-			let $playerColor = $("#chessboardId").closest(".chess-board-container").find(".player-color");
+			let $playerColor = $("#"+chessboardId).closest(".chess-board-container").find(".player-color");
 			$playerColor.css("background-color", color);
+		}
+
+		function changeRoundIndex(roundIndex) {
+
+			let $roundIndex = $("#"+chessboardId).closest(".chess-board-container").find(".round-index");
+			$roundIndex.text(roundIndex);
 		}
 
 		/**
@@ -312,9 +318,12 @@ var Chess = Chess || {};
 
 				initUI();
 
-				registerOnEvents();
-
 				this.update();
+			},
+
+			initEventRegistering: function() {
+
+				registerOnEvents();
 			},
 
 			clear: function() {
@@ -349,6 +358,9 @@ var Chess = Chess || {};
 
 				let playerColor = controller.getAgentManager().getPlayerColor();
 				changePlayerColor(playerColor);
+
+				let roundIndex = controller.getRuleManager().getRoundIndex();
+				changeRoundIndex(roundIndex);
 			},
 
 			/**

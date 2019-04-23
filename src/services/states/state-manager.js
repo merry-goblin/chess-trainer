@@ -121,6 +121,10 @@ var Chess = Chess || {};
 				controller = controllerParam;
 
 				buildStateMachine();
+			},
+
+			initEventRegistering: function() {
+
 				registerOnEvents();
 			},
 
