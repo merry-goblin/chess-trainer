@@ -15,7 +15,7 @@ open index.html in a web browser to start playing
 
 ### Sample
 
-![screenshot](assets/images/chessboard.png | width=360)
+![screenshot](assets/images/chessboard.png)
 
 **/index.html :**
 ```
