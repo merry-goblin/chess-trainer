@@ -34,43 +34,20 @@ var Chess = Chess || {};
 			stateManager.register('before', 'agentActivated', self.beforeAgentActivated);
 		}
 
-		function hasRushed(piece, y1, y2) {
-
-			let result = false;
-
-			if (piece.type === 'p') {
-				let factor  = (piece.color === 'b') ? 1 : -1;
-				let y       = (y2 - y1) * factor;
-				result      = (y == 2) ? true : false;
-			}
-
-			return result;
-		}
-
 		/**
 		 * @param  {remove:[],move:[]}
 		 * @return null
 		 */
 		function applyPiecesChanges(changes) {
 
-			let pieces  = controller.pieces;
+			let pieces = chess.simulator.applyChanges(controller.pieces, roundIndex, changes);
 
 			for (let remove of changes.remove) {
-				pieces[remove.y][remove.x] = null;
 				controller.getGraphicManager().removePiece(remove.x, remove.y);
 			}
 
 			for (let move of changes.move) {
 				let type = (move.type == null) ? null : move.type;
-				pieces[move.y2][move.x2] = pieces[move.y1][move.x1];
-				pieces[move.y1][move.x1] = null;
-				pieces[move.y2][move.x2].last = roundIndex;
-				if (!pieces[move.y2][move.x2].hasRushed) {
-					pieces[move.y2][move.x2].hasRushed = hasRushed(pieces[move.y2][move.x2], move.y1, move.y2);
-				}
-				if (type != null) {
-					pieces[move.y2][move.x2].type = type;
-				}
 				controller.getGraphicManager().movePiece(move.x1, move.y1, move.x2, move.y2, type);
 			}
 		}

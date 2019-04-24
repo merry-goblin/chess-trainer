@@ -15,6 +15,8 @@ open index.html in a web browser to start playing
 
 ### Sample
 
+![screenshot](assets/images/chessboard.png)
+
 **/index.html :**
 ```
 <script src="./vendor/jquery/jquery-3.3.0.min.js"></script>

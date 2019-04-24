@@ -377,6 +377,30 @@ Chess.rules = (function(chess) {
 		return result;
 	}
 
+	function findKing(pieces, color) {
+
+		let kingPosition = null;
+
+		for (let y=0; y<8; y++) {
+			for (let x=0; x<8; x++) {
+				let piece = pieces[y][x];
+				if (piece !== null && piece.type === 'k' && piece.color === color) {
+					kingPosition = {x: x, y: y};
+				}
+			}
+		}
+
+		return kingPosition;
+	}
+
+	function check(pieces, roundIndex, changes, color) {
+
+		let nextPieces   = chess.simulator.applyChanges(pieces, roundIndex, changes);
+		let kingPosition = findKing(nextPieces, color);
+		
+		return changes;
+	}
+
 	function initResult() {
 
 		let result   = {
@@ -418,6 +442,8 @@ Chess.rules = (function(chess) {
 					result = movePawn(pieces, origin, dest, roundIndex);
 					break;
 			}
+
+			//result = check(pieces, roundIndex, result, pieces[origin.y][origin.x].color);
 
 			return result;
 		}
