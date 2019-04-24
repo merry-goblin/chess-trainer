@@ -47,6 +47,11 @@ Chess.utils = (function(chess) {
 		copyArray(arr) {
 
 			return JSON.parse(JSON.stringify(arr));
+		},
+
+		switchColor(color) {
+
+			return (color === 'w') ? 'b' : 'w';
 		}
 	}
 	return scope;

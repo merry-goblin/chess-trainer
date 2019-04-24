@@ -97,7 +97,7 @@ Chess.rules = (function(chess) {
 
 	function moveRook(pieces, origin, dest) {
 
-		let result     = initResult();
+		let result     = new chess.Change();
 		let steps      = getSteps(origin, dest);
 		let increments = getIncrements(steps);
 
@@ -116,7 +116,7 @@ Chess.rules = (function(chess) {
 
 	function moveKnight(pieces, origin, dest) {
 
-		let result  = initResult();
+		let result  = new chess.Change();
 		let steps   = getSteps(origin, dest);
 		steps.x     = Math.abs(steps.x);
 		steps.y     = Math.abs(steps.y);
@@ -136,7 +136,7 @@ Chess.rules = (function(chess) {
 
 	function moveBishop(pieces, origin, dest) {
 
-		let result     = initResult();
+		let result     = new chess.Change();
 		let steps      = getSteps(origin, dest);
 		let increments = getIncrements(steps);
 
@@ -155,7 +155,7 @@ Chess.rules = (function(chess) {
 
 	function moveQueen(pieces, origin, dest) {
 
-		let result     = initResult();
+		let result     = new chess.Change();
 		let steps      = getSteps(origin, dest);
 		let increments = getIncrements(steps);
 
@@ -174,7 +174,7 @@ Chess.rules = (function(chess) {
 
 	function moveKing(pieces, origin, dest) {
 
-		let result  = initResult();
+		let result  = new chess.Change();
 		let steps   = getSteps(origin, dest);
 		let color   = pieces[origin.y][origin.x].color;
 
@@ -197,7 +197,7 @@ Chess.rules = (function(chess) {
 
 	function movePawn(pieces, origin, dest, roundIndex) {
 
-		let result  = initResult();
+		let result  = new chess.Change();
 		let steps   = getSteps(origin, dest);
 		let color   = pieces[origin.y][origin.x].color;
 
@@ -393,36 +393,101 @@ Chess.rules = (function(chess) {
 		return kingPosition;
 	}
 
-	function check(pieces, roundIndex, changes, color) {
+	/**
+	 * Verify if player move will put himself in check
+	 * Verify if player move will put opponent in check
+	 *
+	 * @param  array[chess.Piece]  pieces
+	 * @param  integer             roundIndex
+	 * @param  array[chess.Change] changes
+	 * @param  string              color
+	 */
+	function inCheck(pieces, roundIndex, changes, color) {
 
-		let nextPieces   = chess.simulator.applyChanges(pieces, roundIndex, changes);
-		let kingPosition = findKing(nextPieces, color);
+		let nextPieces   = chess.utils.copyArray(pieces);
+		chess.simulator.applyChanges(nextPieces, roundIndex, changes);
+
+		changes = selfInCheck(nextPieces, roundIndex, changes, color);
+		if (changes.isAllowed) {
+			changes= opponentInCheck(nextPieces, roundIndex, changes, chess.utils.switchColor(color));
+		}
+
+		return changes;
+	}
+
+	/**
+	 * Verify if player is himself in check
+	 *
+	 * @param  array[chess.Piece]  pieces
+	 * @param  integer             roundIndex
+	 * @param  array[chess.Change] changes
+	 * @param  string              color
+	 */
+	function selfInCheck(pieces, roundIndex, changes, color) {
+
+		let kingPosition = findKing(pieces, color);
+
+		checkSimulation:
+		for (let y=0; y<8; y++) {
+			for (let x=0; x<8; x++) {
+				if (y !== kingPosition.y || x !== kingPosition.x) {
+					let piece = pieces[y][x];
+					if (piece !== null && piece.color !== color) {
+						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
+						if (result.isAllowed) {
+							changes = new chess.Change();
+							break checkSimulation;
+						}
+					}
+				}
+			}
+		}
 		
 		return changes;
 	}
 
-	function initResult() {
+	/**
+	 * Verify if player put opponent in check
+	 *
+	 * @param  array[chess.Piece] pieces
+	 * @param  integer  roundIndex
+	 * @param  {[type]} changes    [description]
+	 * @param  {[type]} color      [description]
+	 * @return {[type]}            [description]
+	 */
+	function opponentInCheck(pieces, roundIndex, changes, color) {
 
-		let result   = {
-			isAllowed: false,
-			isCheck: false,
-			isCheckmated: false,
-			move: new Array(),
-			remove: new Array()
-		};
+		let kingPosition = findKing(pieces, color);
 
-		return result;
+		checkSimulation:
+		for (let y=0; y<8; y++) {
+			for (let x=0; x<8; x++) {
+				if (y !== kingPosition.y || x !== kingPosition.x) {
+					let piece = pieces[y][x];
+					if (piece !== null && piece.color !== color) {
+						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
+						if (result.isAllowed) {
+							changes.opponentIsInCheck = true;
+							break checkSimulation;
+						}
+					}
+				}
+			}
+		}
+		
+		return changes;
 	}
 
 	var scope = {
 
 		/*** Public static methods ***/
 
-		movePiece: function(pieces, origin, dest, roundIndex) {
+		movePiece: function(pieces, origin, dest, roundIndex, verifyCheck) {
 
 			let result = null;
+			let piece  = pieces[origin.y][origin.x];
 
-			switch (pieces[origin.y][origin.x].type) {
+			switch (piece.type) {
 				case 'r':
 					result = moveRook(pieces, origin, dest);
 					break;
@@ -443,7 +508,9 @@ Chess.rules = (function(chess) {
 					break;
 			}
 
-			//result = check(pieces, roundIndex, result, pieces[origin.y][origin.x].color);
+			if (verifyCheck) {
+				result = inCheck(pieces, roundIndex, result, piece.color);
+			}
 
 			return result;
 		}

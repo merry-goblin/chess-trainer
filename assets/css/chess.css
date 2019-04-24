@@ -40,6 +40,18 @@ html, body {
 	float: left;
 }
 
+.chess-board-container .chess-board-header .check-state {
+	display: block;
+	width: 200px;
+	height: 32px;
+	padding: 8px 8px 0px 8px;
+	float: left;
+	text-align: left;
+	color: #fff;
+	font-weight: bold;
+	font-size: 24px;
+}
+
 .chess-board-container .chess-board-header .round-index {
 	display: block;
 	width: 200px;

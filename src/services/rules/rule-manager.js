@@ -40,16 +40,9 @@ var Chess = Chess || {};
 		 */
 		function applyPiecesChanges(changes) {
 
-			let pieces = chess.simulator.applyChanges(controller.pieces, roundIndex, changes);
+			chess.simulator.applyChanges(controller.pieces, roundIndex, changes);
 
-			for (let remove of changes.remove) {
-				controller.getGraphicManager().removePiece(remove.x, remove.y);
-			}
-
-			for (let move of changes.move) {
-				let type = (move.type == null) ? null : move.type;
-				controller.getGraphicManager().movePiece(move.x1, move.y1, move.x2, move.y2, type);
-			}
+			controller.getGraphicManager().applyChanges(changes);
 		}
 
 		/**
@@ -95,7 +88,7 @@ var Chess = Chess || {};
 
 				movement  = parameters.movement;
 				let pieces  = controller.pieces;
-				let result  = chess.rules.movePiece(pieces, selection, movement, roundIndex);
+				let result  = chess.rules.movePiece(pieces, selection, movement, roundIndex, true);
 
 				if (result.isAllowed) {
 					applyPiecesChanges(result);

@@ -277,6 +277,14 @@ var Chess = Chess || {};
 			$roundIndex.text(roundIndex);
 		}
 
+		function setInCheckState(checkState) {
+
+			let text = (checkState) ? "Check!" : "";
+
+			let $checkState = $("#"+chessboardId).closest(".chess-board-container").find(".check-state");
+			$checkState.text(text);
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
@@ -334,14 +342,18 @@ var Chess = Chess || {};
 				this.update();
 			},
 
-			movePiece: function(x1, y1, x2, y2, type) {
+			applyChanges: function(changes) {
 
-				movePiece(x1, y1, x2, y2, type);
-			},
+				for (let remove of changes.remove) {
+					removePiece(remove.x, remove.y);
+				}
 
-			removePiece: function(x, y) {
+				for (let move of changes.move) {
+					let type = (move.type == null) ? null : move.type;
+					movePiece(move.x1, move.y1, move.x2, move.y2, type);
+				}
 
-				removePiece(x, y);
+				setInCheckState(changes.opponentIsInCheck);
 			},
 
 			debug: function() {

@@ -45,8 +45,6 @@ Chess.simulator = (function(chess) {
 					pieces[move.y2][move.x2].type = type;
 				}
 			}
-
-			return pieces;
 		}
 
 	}

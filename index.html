@@ -15,6 +15,7 @@
 		<div class="chess-board-container">
 			<div class="chess-board-header clearfix">
 				<div class="player-color"></div>
+				<div class="check-state"></div>
 				<div class="round-index">0</div>
 			</div>
 			<canvas id="chess-board" width="600" height="600"></canvas>
@@ -25,6 +26,7 @@
 	<script src="./vendor/jquery/jquery-3.3.0.min.js"></script>
 	<script src="./vendor/ocanvas/ocanvas-2.10.0.js"></script>
 	<script src="./config/app.js"></script>
+	<script src="./src/entities/change.js"></script>
 	<script src="./src/entities/piece.js"></script>
 	<script src="./src/services/utils.js"></script>
 	<script src="./src/services/graphics/graphic-manager.js"></script>
@@ -42,8 +44,8 @@
 
 			let whiteAgent  = new chess.PlayerAgent();
 			let blackAgent  = new chess.PlayerAgent();
-			let customModel = null;
-			/*//	Lucena position
+			//let customModel = null;
+			//	Lucena position
 			let customModel = {
 				c1: 'br',
 				g6: 'bk',
@@ -51,7 +53,7 @@
 				d7: 'wp',
 				d8: 'wk',
 				f2: 'wr',
-			};*/
+			};
 
 			var mainController = new chess.Main();
 			mainController.init(whiteAgent, blackAgent, customModel);
