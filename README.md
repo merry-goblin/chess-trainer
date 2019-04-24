@@ -15,7 +15,7 @@ open index.html in a web browser to start playing
 
 ### Sample
 
-![screenshot](assets/images/chessboard.png)
+![screenshot](assets/images/chessboard.png | width=360)
 
 **/index.html :**
 ```
@@ -79,4 +79,9 @@ open index.html in a web browser to start playing
 
 ### Available agents
 
-- PlayerAgent : use click mouse on pieces to be triggered
+- PlayerAgent : use mouse click on pieces to be triggered
+
+### Agents to come
+
+- RandomAgent : play randomly among available moves
+- MinMaxAgent : play the best solution according to scores on actions and a maximum of iterations
