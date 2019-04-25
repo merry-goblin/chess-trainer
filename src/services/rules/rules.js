@@ -288,12 +288,15 @@ Chess.rules = (function(chess) {
 
 	function buildResultPawnTakeOnly(result, pieces, origin, dest, color, roundIndex) {
 
+		let border = (color === 'w')     ? 0  : 8;
+		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
+
 		if (pieces[dest.y][dest.x] !== null) {
 			if (pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
 				//	A piece is taken of a different color
 				result.isAllowed = true;
 				result.remove.push({ x: dest.x, y: dest.y });
-				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y, type: type });
 			}
 		}
 		else {
@@ -304,7 +307,7 @@ Chess.rules = (function(chess) {
 				//	En passant succeed
 				result.isAllowed = true;
 				result.remove.push({ x: dest.x, y: dest.y+decrement });
-				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y, type: type });
 			}
 		}
 
@@ -397,10 +400,11 @@ Chess.rules = (function(chess) {
 	 * Verify if player move will put himself in check
 	 * Verify if player move will put opponent in check
 	 *
-	 * @param  array[chess.Piece]  pieces
+	 * @param  array[Chess.Piece]  pieces
 	 * @param  integer             roundIndex
-	 * @param  array[chess.Change] changes
+	 * @param  Chess.Change        changes
 	 * @param  string              color
+	 * @return Chess.Change
 	 */
 	function inCheck(pieces, roundIndex, changes, color) {
 
@@ -409,7 +413,11 @@ Chess.rules = (function(chess) {
 
 		changes = selfInCheck(nextPieces, roundIndex, changes, color);
 		if (changes.isAllowed) {
-			changes= opponentInCheck(nextPieces, roundIndex, changes, chess.utils.switchColor(color));
+			let opponentColor = chess.utils.switchColor(color);
+			let kingPosition  = findKing(pieces, opponentColor);
+
+			changes.opponentIsInCheck      = opponentInCheck(nextPieces, roundIndex, changes, opponentColor, kingPosition);
+			changes.opponentIsInCheckmate  = opponentInCheckmate(nextPieces, roundIndex, changes, opponentColor, kingPosition);
 		}
 
 		return changes;
@@ -418,10 +426,11 @@ Chess.rules = (function(chess) {
 	/**
 	 * Verify if player is himself in check
 	 *
-	 * @param  array[chess.Piece]  pieces
+	 * @param  array[Chess.Piece]  pieces
 	 * @param  integer             roundIndex
-	 * @param  array[chess.Change] changes
+	 * @param  Chess.Change        changes
 	 * @param  string              color
+	 * @return Chess.Change
 	 */
 	function selfInCheck(pieces, roundIndex, changes, color) {
 
@@ -447,19 +456,54 @@ Chess.rules = (function(chess) {
 	}
 
 	/**
-	 * Verify if player put opponent in check
+	 * Verify if player put the opponent in check
 	 *
-	 * @param  array[chess.Piece] pieces
-	 * @param  integer  roundIndex
-	 * @param  {[type]} changes    [description]
-	 * @param  {[type]} color      [description]
-	 * @return {[type]}            [description]
+	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
+	 * @param  integer             roundIndex
+	 * @param  Chess.Change        changes
+	 * @param  string              color
+	 * @param  {x,y}               kingPosition
+	 * @return boolean
 	 */
-	function opponentInCheck(pieces, roundIndex, changes, color) {
+	function opponentInCheck(pieces, roundIndex, changes, color, kingPosition) {
 
-		let kingPosition = findKing(pieces, color);
+		let opponentIsInCheck = false;
 
 		checkSimulation:
+		for (let y=0; y<8; y++) {
+			for (let x=0; x<8; x++) {
+				if (y !== kingPosition.y || x !== kingPosition.x) {
+					let piece = pieces[y][x];
+					if (piece !== null && piece.color !== color) {
+						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
+						if (result.isAllowed) {
+							opponentIsInCheck = true;
+							break checkSimulation;
+						}
+					}
+				}
+			}
+		}
+		
+		return opponentIsInCheck;
+	}
+
+	/**
+	 * Verify if player put the opponent in checkmate
+	 * This method is called if the oppenent is already in check
+	 *
+	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
+	 * @param  integer             roundIndex
+	 * @param  Chess.Change        changes
+	 * @param  string              color
+	 * @param  {x,y}               kingPosition
+	 * @return Chess.Change
+	 */
+	function opponentInCheckmate(pieces, roundIndex, changes, color, kingPosition) {
+
+		let opponentIsInCheckmate = false;
+
+		/*checkSimulation:
 		for (let y=0; y<8; y++) {
 			for (let x=0; x<8; x++) {
 				if (y !== kingPosition.y || x !== kingPosition.x) {
@@ -473,9 +517,9 @@ Chess.rules = (function(chess) {
 					}
 				}
 			}
-		}
+		}*/
 		
-		return changes;
+		return opponentIsInCheckmate;
 	}
 
 	var scope = {
@@ -508,6 +552,7 @@ Chess.rules = (function(chess) {
 					break;
 			}
 
+			//	Check & checkmate
 			if (verifyCheck) {
 				result = inCheck(pieces, roundIndex, result, piece.color);
 			}
