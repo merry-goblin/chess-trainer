@@ -38,7 +38,7 @@ Chess.simulator = (function(chess) {
 			if (piecePosition.y !== y) {
 				piece = pieces[y][piecePosition.x];
 				if (piece === null || piece.color !== pieceToMove.color) {
-					availableMoves.push({x: piecePosition.x, y: posY});
+					availableMoves.push({x: piecePosition.x, y: y});
 				}
 			}
 		}
