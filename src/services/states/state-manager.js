@@ -71,7 +71,7 @@ var Chess = Chess || {};
 		}
 
 		function dispatchStateEvent(event, state) {
-//console.log("state",event, state);
+
 			for (let callback of events[state][event]) {
 				callback();
 			}
@@ -86,7 +86,7 @@ var Chess = Chess || {};
 					break;
 				}
 			}
-//console.log("action",event, action, isSuccess);
+
 			return isSuccess;
 		}
 

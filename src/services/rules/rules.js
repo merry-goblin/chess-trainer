@@ -416,8 +416,8 @@ Chess.rules = (function(chess) {
 			let opponentColor = chess.utils.switchColor(color);
 			let kingPosition  = findKing(pieces, opponentColor);
 
-			changes.opponentIsInCheck      = opponentInCheck(nextPieces, roundIndex, changes, opponentColor, kingPosition);
-			changes.opponentIsInCheckmate  = opponentInCheckmate(nextPieces, roundIndex, changes, opponentColor, kingPosition);
+			changes.opponentIsInCheck      = opponentInCheck(nextPieces, roundIndex, opponentColor, kingPosition);
+			changes.opponentIsInCheckmate  = opponentInCheckmate(nextPieces, roundIndex, opponentColor, kingPosition);
 		}
 
 		return changes;
@@ -436,7 +436,7 @@ Chess.rules = (function(chess) {
 
 		let kingPosition = findKing(pieces, color);
 
-		checkSimulation:
+		simulation:
 		for (let y=0; y<8; y++) {
 			for (let x=0; x<8; x++) {
 				if (y !== kingPosition.y || x !== kingPosition.x) {
@@ -445,7 +445,7 @@ Chess.rules = (function(chess) {
 						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
 						if (result.isAllowed) {
 							changes = new chess.Change();
-							break checkSimulation;
+							break simulation;
 						}
 					}
 				}
@@ -460,16 +460,15 @@ Chess.rules = (function(chess) {
 	 *
 	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
 	 * @param  integer             roundIndex
-	 * @param  Chess.Change        changes
 	 * @param  string              color
 	 * @param  {x,y}               kingPosition
 	 * @return boolean
 	 */
-	function opponentInCheck(pieces, roundIndex, changes, color, kingPosition) {
+	function opponentInCheck(pieces, roundIndex, color, kingPosition) {
 
 		let opponentIsInCheck = false;
 
-		checkSimulation:
+		simulation:
 		for (let y=0; y<8; y++) {
 			for (let x=0; x<8; x++) {
 				if (y !== kingPosition.y || x !== kingPosition.x) {
@@ -478,7 +477,7 @@ Chess.rules = (function(chess) {
 						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
 						if (result.isAllowed) {
 							opponentIsInCheck = true;
-							break checkSimulation;
+							break simulation;
 						}
 					}
 				}
@@ -494,31 +493,41 @@ Chess.rules = (function(chess) {
 	 *
 	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
 	 * @param  integer             roundIndex
-	 * @param  Chess.Change        changes
 	 * @param  string              color
 	 * @param  {x,y}               kingPosition
 	 * @return Chess.Change
 	 */
-	function opponentInCheckmate(pieces, roundIndex, changes, color, kingPosition) {
+	function opponentInCheckmate(pieces, roundIndex, color, kingPosition) {
 
-		let opponentIsInCheckmate = false;
+		//	We are looking for a way out
+		//	So until this way out is found we consider this is a checkmate
+		let opponentIsInCheckmate = true;
 
-		/*checkSimulation:
-		for (let y=0; y<8; y++) {
-			for (let x=0; x<8; x++) {
-				if (y !== kingPosition.y || x !== kingPosition.x) {
-					let piece = pieces[y][x];
-					if (piece !== null && piece.color !== color) {
-						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
-						if (result.isAllowed) {
-							changes.opponentIsInCheck = true;
-							break checkSimulation;
-						}
+		simulation: {
+			//	Every available pieces for the opponent
+			let allAvailablePieces = chess.simulator.allAvailablePieces(pieces, color); // [{x,y},...]
+			for (let pieceIndex in allAvailablePieces) {
+				let piecePosition = allAvailablePieces[pieceIndex];
+
+				//	Every possible moves for the opponent
+				let allPieceMoves = chess.simulator.allPieceMoves(pieces, piecePosition, roundIndex);
+				for (let moveIndex in allPieceMoves) {
+					let pieceMove = allPieceMoves[moveIndex];
+
+					//	Simulate move
+					let changes = chess.rules.movePiece(pieces, piecePosition, pieceMove, roundIndex, false);
+					let nextPieces   = chess.utils.copyArray(pieces);
+					chess.simulator.applyChanges(nextPieces, roundIndex, changes);
+
+					changes = selfInCheck(nextPieces, roundIndex, changes, color);
+					if (changes.isAllowed) {
+						opponentIsInCheckmate = false;
+						break simulation;
 					}
 				}
 			}
-		}*/
-		
+		}
+
 		return opponentIsInCheckmate;
 	}
 

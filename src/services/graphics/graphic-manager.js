@@ -277,9 +277,17 @@ var Chess = Chess || {};
 			$roundIndex.text(roundIndex);
 		}
 
-		function setInCheckState(checkState) {
+		function applyState(changes) {
 
-			let text = (checkState) ? "Check!" : "";
+			let text = "";
+			if (changes.opponentIsInCheckmate) {
+				let color = controller.getAgentManager().getPlayerColor();
+				text = "Checkmate.";
+				text += (color === 'w') ? " White wins!" : " Black wins!";
+			}
+			else if (changes.opponentIsInCheck) {
+				text = "Check!";
+			}
 
 			let $checkState = $("#"+chessboardId).closest(".chess-board-container").find(".check-state");
 			$checkState.text(text);
@@ -353,7 +361,7 @@ var Chess = Chess || {};
 					movePiece(move.x1, move.y1, move.x2, move.y2, type);
 				}
 
-				setInCheckState(changes.opponentIsInCheck);
+				applyState(changes);
 			},
 
 			debug: function() {

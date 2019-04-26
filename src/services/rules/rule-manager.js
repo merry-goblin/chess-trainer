@@ -22,6 +22,7 @@ var Chess = Chess || {};
 		var selection  = null;
 		var movement   = null;
 		var roundIndex = 0;
+		var gameIsOver = false;
 
 		/*** Private methods ***/
 
@@ -43,6 +44,10 @@ var Chess = Chess || {};
 			chess.simulator.applyChanges(controller.pieces, roundIndex, changes);
 
 			controller.getGraphicManager().applyChanges(changes);
+
+			if (changes.opponentIsInCheckmate) {
+				gameIsOver = true;
+			}
 		}
 
 		/**
@@ -108,9 +113,12 @@ var Chess = Chess || {};
 
 			afterAgentDesactivated: function() {
 
-				//	Todo : check if game is over
-
-				controller.getStateManager().trigger('endRound');
+				if (gameIsOver) {
+					controller.getStateManager().trigger('endGame');
+				}
+				else {
+					controller.getStateManager().trigger('endRound');
+				}
 			},
 
 			/**
