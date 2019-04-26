@@ -280,7 +280,10 @@ var Chess = Chess || {};
 		function applyState(changes) {
 
 			let text = "";
-			if (changes.opponentIsInCheckmate) {
+			if (changes.draws) {
+				text = "Draws!";
+			}
+			else if  (changes.opponentIsInCheckmate) {
 				let color = controller.getAgentManager().getPlayerColor();
 				text = "Checkmate.";
 				text += (color === 'w') ? " White wins!" : " Black wins!";

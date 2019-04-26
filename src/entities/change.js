@@ -12,6 +12,7 @@ Chess.Change = function() {
 	this.isAllowed             = false;
 	this.opponentIsInCheck     = false;
 	this.opponentIsInCheckmate = false;
+	this.draws                 = false;
 	this.move                  = new Array();
 	this.remove                = new Array();
 };

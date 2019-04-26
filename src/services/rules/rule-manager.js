@@ -45,7 +45,7 @@ var Chess = Chess || {};
 
 			controller.getGraphicManager().applyChanges(changes);
 
-			if (changes.opponentIsInCheckmate) {
+			if (changes.opponentIsInCheckmate || changes.draws) {
 				gameIsOver = true;
 			}
 		}

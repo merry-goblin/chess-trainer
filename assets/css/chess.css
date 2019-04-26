@@ -26,7 +26,7 @@ html, body {
 .chess-board-container .chess-board-header {
 	display: block;
 	width: 592px;
-	height: 40px;
+	min-height: 40px;
 	margin: 0px 0px 0px 0px;
 	padding: 4px;
 	/*background-color: rgba(210, 105, 30, 0.75);*/
@@ -44,8 +44,8 @@ html, body {
 
 .chess-board-container .chess-board-header .check-state {
 	display: inline-block;
-	height: 32px;
-	padding: 8px 8px 0px 8px;
+	height: 30px;
+	padding: 6px 8px 0px 8px;
 	color: #fff;
 	font-weight: bold;
 	font-size: 24px;

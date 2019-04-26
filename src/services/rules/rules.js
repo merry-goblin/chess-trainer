@@ -410,14 +410,19 @@ Chess.rules = (function(chess) {
 
 		let nextPieces   = chess.utils.copyArray(pieces);
 		chess.simulator.applyChanges(nextPieces, roundIndex, changes);
+		roundIndex++;
+
+		let opponentColor = chess.utils.switchColor(color);
 
 		changes = selfInCheck(nextPieces, roundIndex, changes, color);
 		if (changes.isAllowed) {
-			let opponentColor = chess.utils.switchColor(color);
-			let kingPosition  = findKing(pieces, opponentColor);
+			changes.opponentIsInCheck      = opponentInCheck(nextPieces, roundIndex, opponentColor);
+			changes.opponentIsInCheckmate  = opponentInCheckmate(nextPieces, roundIndex, opponentColor);
+		}
 
-			changes.opponentIsInCheck      = opponentInCheck(nextPieces, roundIndex, opponentColor, kingPosition);
-			changes.opponentIsInCheckmate  = opponentInCheckmate(nextPieces, roundIndex, opponentColor, kingPosition);
+		//	Draw
+		if (!changes.opponentIsInCheck) {
+			changes.draws = drawWithNoLegalMoves(nextPieces, roundIndex, opponentColor);
 		}
 
 		return changes;
@@ -461,12 +466,12 @@ Chess.rules = (function(chess) {
 	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
 	 * @param  integer             roundIndex
 	 * @param  string              color
-	 * @param  {x,y}               kingPosition
 	 * @return boolean
 	 */
-	function opponentInCheck(pieces, roundIndex, color, kingPosition) {
+	function opponentInCheck(pieces, roundIndex, color) {
 
 		let opponentIsInCheck = false;
+		let kingPosition      = findKing(pieces, color);
 
 		simulation:
 		for (let y=0; y<8; y++) {
@@ -483,7 +488,7 @@ Chess.rules = (function(chess) {
 				}
 			}
 		}
-		
+
 		return opponentIsInCheck;
 	}
 
@@ -494,14 +499,14 @@ Chess.rules = (function(chess) {
 	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
 	 * @param  integer             roundIndex
 	 * @param  string              color
-	 * @param  {x,y}               kingPosition
 	 * @return Chess.Change
 	 */
-	function opponentInCheckmate(pieces, roundIndex, color, kingPosition) {
+	function opponentInCheckmate(pieces, roundIndex, color) {
 
 		//	We are looking for a way out
 		//	So until this way out is found we consider this is a checkmate
 		let opponentIsInCheckmate = true;
+		let roundIndex2           = roundIndex+1;
 
 		simulation: {
 			//	Every available pieces for the opponent
@@ -519,7 +524,7 @@ Chess.rules = (function(chess) {
 					let nextPieces   = chess.utils.copyArray(pieces);
 					chess.simulator.applyChanges(nextPieces, roundIndex, changes);
 
-					changes = selfInCheck(nextPieces, roundIndex, changes, color);
+					changes = selfInCheck(nextPieces, roundIndex2, changes, color);
 					if (changes.isAllowed) {
 						opponentIsInCheckmate = false;
 						break simulation;
@@ -529,6 +534,54 @@ Chess.rules = (function(chess) {
 		}
 
 		return opponentIsInCheckmate;
+	}
+
+	/**
+	 * Verify if player put the opponent in checkmate
+	 * This method is called if the oppenent is already in check
+	 *
+	 * @param  array[Chess.Piece]  pieces       [pieces once the piece move has been fulfilled]
+	 * @param  integer             roundIndex
+	 * @param  string              color
+	 * @return Chess.Change
+	 */
+	function drawWithNoLegalMoves(pieces, roundIndex, color) {
+
+		//	We are looking for a way out
+		//	So until this way out is found we consider this is a checkmate
+		let draws = true;
+
+		simulation: {
+			//	Every available pieces for the opponent
+			let allAvailablePieces = chess.simulator.allAvailablePieces(pieces, color); // [{x,y},...]
+			for (let pieceIndex in allAvailablePieces) {
+				let piecePosition = allAvailablePieces[pieceIndex];
+
+				//	Every possible moves for the opponent
+				let allPieceMoves = chess.simulator.allPieceMoves(pieces, piecePosition, roundIndex);
+				for (let moveIndex in allPieceMoves) {
+					let pieceMove = allPieceMoves[moveIndex];
+
+					//	Simulate move
+					let changes = chess.rules.movePiece(pieces, piecePosition, pieceMove, roundIndex, false);
+
+					//	Move is allowed but check ahs not been verified yet
+					if (changes.isAllowed) {
+
+						let nextPieces   = chess.utils.copyArray(pieces);
+						chess.simulator.applyChanges(nextPieces, roundIndex, changes);
+
+						changes = selfInCheck(nextPieces, roundIndex, changes, color);
+						if (changes.isAllowed) {
+							draws = false;
+							break simulation;
+						}
+					}
+				}
+			}
+		}
+
+		return draws;
 	}
 
 	var scope = {
