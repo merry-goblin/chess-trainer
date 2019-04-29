@@ -68,7 +68,7 @@ var Chess = Chess || {};
 					availablePiecesMovements.push(availablePieceMovement);
 				}
 
-				let numero = chess.utils.getRandomInt(0, totalAllowedMovements); console.log(totalAllowedMovements, numero);
+				let numero = chess.utils.getRandomInt(0, totalAllowedMovements);
 				let count  = 0;
 
 				chooseMovement:
@@ -76,8 +76,8 @@ var Chess = Chess || {};
 					for (let y=0, nbMovements=availablePiecesMovements[i].length; y<nbMovements; y++) {
 
 						if (numero === count) {
-							movement = availablePiecesMovements[i][y];console.log(movement);
-							callbackSelection(availablePieces[i]);console.log(availablePieces[i]);
+							movement = availablePiecesMovements[i][y];
+							callbackSelection(availablePieces[i]);
 							break chooseMovement;
 						}
 						count++;

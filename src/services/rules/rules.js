@@ -285,7 +285,7 @@ Chess.rules = (function(chess) {
 
 	function buildResultPawnMoveOnly(result, pieces, origin, dest, color) {
 
-		let border = (color === 'w')     ? 0  : 8;
+		let border = (color === 'w')     ? 0  : 7;
 		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
 
 		if (pieces[dest.y][dest.x] === null) {
@@ -298,7 +298,7 @@ Chess.rules = (function(chess) {
 
 	function buildResultPawnTakeOnly(result, pieces, origin, dest, color, roundIndex) {
 
-		let border = (color === 'w')     ? 0  : 8;
+		let border = (color === 'w')     ? 0  : 7;
 		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
 
 		if (pieces[dest.y][dest.x] !== null) {

@@ -144,6 +144,7 @@ var Chess = Chess || {};
 				else {
 					playerRound = (playerRound == 'w') ? 'b' : 'w';
 				}
+
 				activateAgent();
 			},
 
@@ -153,7 +154,9 @@ var Chess = Chess || {};
 			 */
 			afterWaitSelection: function() {
 
-				currentAgent.playSelection(controller.pieces);
+				window.setTimeout(function() {
+					currentAgent.playSelection(controller.pieces);
+				}, 10);
 			},
 
 			/**
