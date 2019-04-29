@@ -30,6 +30,8 @@ var Chess = Chess || {};
 
 			let stateManager = controller.getStateManager();
 			stateManager.register('before', 'agentActivated', self.beforeAgentInitialized);
+			stateManager.register('after', 'waitSelection', self.afterWaitSelection);
+			stateManager.register('after', 'waitMovement', self.afterWaitMovement);
 
 			whiteAgent.setFunctionToTriggerEvents(self.agentSelection, self.agentMovement);
 			blackAgent.setFunctionToTriggerEvents(self.agentSelection, self.agentMovement);
@@ -37,13 +39,15 @@ var Chess = Chess || {};
 
 		function activateAgent() {
 
+			let roundIndex = controller.getRuleManager().getRoundIndex();
+
 			if (playerRound == 'w') {
 				currentAgent = whiteAgent;
-				whiteAgent.activate();
+				whiteAgent.activate(roundIndex);
 			}
 			else {
 				currentAgent = blackAgent;
-				blackAgent.activate();
+				blackAgent.activate(roundIndex);
 			}
 		}
 
@@ -119,6 +123,8 @@ var Chess = Chess || {};
 				controller = controllerParam;
 				whiteAgent = whiteAgentParam;
 				blackAgent = blackAgentParam;
+				whiteAgent.init('w');
+				blackAgent.init('b');
 			},
 
 			initEventRegistering: function() {
@@ -139,6 +145,24 @@ var Chess = Chess || {};
 					playerRound = (playerRound == 'w') ? 'b' : 'w';
 				}
 				activateAgent();
+			},
+
+			/**
+			 * Called by state manager
+			 * @return null
+			 */
+			afterWaitSelection: function() {
+
+				currentAgent.playSelection(controller.pieces);
+			},
+
+			/**
+			 * Called by state manager
+			 * @return null
+			 */
+			afterWaitMovement: function() {
+
+				currentAgent.playMovement(controller.pieces);
 			},
 
 			triggerClick: function(position) {

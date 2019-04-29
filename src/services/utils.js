@@ -44,17 +44,17 @@ Chess.utils = (function(chess) {
 			}
 		},
 
-		copyArray(arr) {
+		copyArray: function(arr) {
 
 			return JSON.parse(JSON.stringify(arr));
 		},
 
-		switchColor(color) {
+		switchColor: function(color) {
 
 			return (color === 'w') ? 'b' : 'w';
 		},
 
-		compareArrays(array1, array2) {
+		compareArrays: function(array1, array2) {
 
 			array1.sort();
 			array2.sort();
@@ -65,6 +65,14 @@ Chess.utils = (function(chess) {
 					return value === array2[index];
 				})
 			);
+		},
+
+		getRandomInt: function(min, max) {
+
+			min = Math.ceil(min);
+			max = Math.floor(max);
+
+			return Math.floor(Math.random() * (max - min)) + min;
 		}
 	}
 	return scope;

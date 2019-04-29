@@ -15,6 +15,8 @@ var Chess = Chess || {};
 
 		var settings = $.extend({}, settings);
 
+		var color = null;
+
 		var callbackSelection = null;
 		var callbackMovement  = null;
 
@@ -35,9 +37,9 @@ var Chess = Chess || {};
 
 			/*** Public methods ***/
 
-			init: function() {
+			init: function(colorParam) {
 
-				
+				color = colorParam;
 			},
 
 			activate: function() {
@@ -45,6 +47,18 @@ var Chess = Chess || {};
 			},
 
 			desactivate: function() {
+
+			},
+
+			//	AI only
+			playSelection: function() {
+
+
+			},
+
+			//	AI only
+			playMovement: function() {
+
 
 			},
 

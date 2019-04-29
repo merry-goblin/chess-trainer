@@ -19,18 +19,22 @@ open index.html in a web browser to start playing
 
 **/index.html :**
 ```
+
 <script src="./vendor/jquery/jquery-3.3.0.min.js"></script>
 <script src="./vendor/ocanvas/ocanvas-2.10.0.js"></script>
 <script src="./config/app.js"></script>
+<script src="./src/entities/change.js"></script>
 <script src="./src/entities/piece.js"></script>
 <script src="./src/services/utils.js"></script>
 <script src="./src/services/graphics/graphic-manager.js"></script>
-<script src="./src/services/rules/rule-manager.js"></script>
 <script src="./src/services/rules/rules.js"></script>
+<script src="./src/services/rules/simulator.js"></script>
+<script src="./src/services/rules/rule-manager.js"></script>
 <script src="./src/services/states/state-manager.js"></script>
 <script src="./src/services/states/finite-state-machine.js"></script>
 <script src="./src/services/agents/agent-manager.js"></script>
 <script src="./src/services/agents/player-agent.js"></script>
+<script src="./src/services/agents/random-agent.js"></script>
 <script src="./src/controllers/main.js"></script>
 
 <script>
@@ -38,7 +42,7 @@ open index.html in a web browser to start playing
 	(function($, chess) {
 
 		let whiteAgent  = new chess.PlayerAgent();
-		let blackAgent  = new chess.PlayerAgent();
+		let blackAgent  = new chess.RandomAgent();
 		let customModel = null;
 
 		var mainController = new chess.Main();
@@ -59,8 +63,10 @@ open index.html in a web browser to start playing
 
 		let whiteAgent  = new chess.PlayerAgent();
 		let blackAgent  = new chess.PlayerAgent();
+		let customModel = null;
+
 		//	Lucena position
-		let customModel = {
+		customModel = {
 			c1: 'br',
 			g6: 'bk',
 
@@ -80,8 +86,8 @@ open index.html in a web browser to start playing
 ### Available agents
 
 - PlayerAgent : use mouse click on pieces to be triggered
+- RandomAgent : play randomly among available moves
 
 ### Agents to come
 
-- RandomAgent : play randomly among available moves
 - MinMaxAgent : play the best solution according to scores on actions and a maximum of iterations
