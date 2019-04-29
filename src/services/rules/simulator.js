@@ -236,7 +236,7 @@ Chess.simulator = (function(chess) {
 			}
 		},
 
-		allAvailablePieces: function(pieces, color) {
+		allAvailablePiecesPositions: function(pieces, color) {
 
 			let availablePieces = new Array();
 
@@ -245,6 +245,22 @@ Chess.simulator = (function(chess) {
 					let piece = pieces[y][x];
 					if (piece !== null && piece.color === color) {
 						availablePieces.push({x: x, y: y});
+					}
+				}
+			}
+
+			return availablePieces;
+		},
+
+		allAvailablePieces: function(pieces, color) {
+
+			let availablePieces = new Array();
+
+			for (let y=0; y<8; y++) {
+				for (let x=0; x<8; x++) {
+					let piece = pieces[y][x];
+					if (piece !== null && piece.color === color) {
+						availablePieces.push(piece.type);
 					}
 				}
 			}

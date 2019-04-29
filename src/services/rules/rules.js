@@ -10,6 +10,16 @@ var Chess = Chess || {};
 
 Chess.rules = (function(chess) {
 
+	var listOfInsufficientMaterial = [
+		{ p1: ['k'], p2: ['k']     },
+		{ p1: ['k'], p2: ['k','b'] },
+		{ p1: ['k'], p2: ['k','n'] }
+	];
+
+	var unusualListOfInsufficientMaterial = [
+		{ p1: ['k','b'], p2: ['k','b'] }
+	];
+
 	function pieceIsBlocked(pieces, origin, dest, increments) {
 
 		let isBlocked = false;
@@ -380,20 +390,30 @@ Chess.rules = (function(chess) {
 		return result;
 	}
 
-	function findKing(pieces, color) {
+	/**
+	 * First piece of type found for a specific player
+	 *
+	 * @param  [{x,y}] pieces
+	 * @param  string  color
+	 * @param  string  type
+	 * @return {x,y}
+	 */
+	function findPiece(pieces, color, type) {
 
-		let kingPosition = null;
+		let position = null;
 
+		find:
 		for (let y=0; y<8; y++) {
 			for (let x=0; x<8; x++) {
 				let piece = pieces[y][x];
-				if (piece !== null && piece.type === 'k' && piece.color === color) {
-					kingPosition = {x: x, y: y};
+				if (piece !== null && piece.type === type && piece.color === color) {
+					position = {x: x, y: y};
+					break find;
 				}
 			}
 		}
 
-		return kingPosition;
+		return position;
 	}
 
 	/**
@@ -422,7 +442,10 @@ Chess.rules = (function(chess) {
 
 		//	Draw
 		if (!changes.opponentIsInCheck) {
-			changes.draws = drawWithNoLegalMoves(nextPieces, roundIndex, opponentColor);
+			changes.draws = drawsWithInsufficientMaterial(nextPieces);
+			if (!changes.draws) {
+				changes.draws = drawsWithNoLegalMoves(nextPieces, roundIndex, opponentColor);
+			}
 		}
 
 		return changes;
@@ -439,7 +462,7 @@ Chess.rules = (function(chess) {
 	 */
 	function selfInCheck(pieces, roundIndex, changes, color) {
 
-		let kingPosition = findKing(pieces, color);
+		let kingPosition = findPiece(pieces, color, 'k');
 
 		simulation:
 		for (let y=0; y<8; y++) {
@@ -471,7 +494,7 @@ Chess.rules = (function(chess) {
 	function opponentInCheck(pieces, roundIndex, color) {
 
 		let opponentIsInCheck = false;
-		let kingPosition      = findKing(pieces, color);
+		let kingPosition      = findPiece(pieces, color, 'k');
 
 		simulation:
 		for (let y=0; y<8; y++) {
@@ -510,7 +533,7 @@ Chess.rules = (function(chess) {
 
 		simulation: {
 			//	Every available pieces for the opponent
-			let allAvailablePieces = chess.simulator.allAvailablePieces(pieces, color); // [{x,y},...]
+			let allAvailablePieces = chess.simulator.allAvailablePiecesPositions(pieces, color); // [{x,y},...]
 			for (let pieceIndex in allAvailablePieces) {
 				let piecePosition = allAvailablePieces[pieceIndex];
 
@@ -545,7 +568,7 @@ Chess.rules = (function(chess) {
 	 * @param  string              color
 	 * @return Chess.Change
 	 */
-	function drawWithNoLegalMoves(pieces, roundIndex, color) {
+	function drawsWithNoLegalMoves(pieces, roundIndex, color) {
 
 		//	We are looking for a way out
 		//	So until this way out is found we consider this is a checkmate
@@ -553,7 +576,7 @@ Chess.rules = (function(chess) {
 
 		simulation: {
 			//	Every available pieces for the opponent
-			let allAvailablePieces = chess.simulator.allAvailablePieces(pieces, color); // [{x,y},...]
+			let allAvailablePieces = chess.simulator.allAvailablePiecesPositions(pieces, color); // [{x,y},...]
 			for (let pieceIndex in allAvailablePieces) {
 				let piecePosition = allAvailablePieces[pieceIndex];
 
@@ -582,6 +605,49 @@ Chess.rules = (function(chess) {
 		}
 
 		return draws;
+	}
+
+	function drawsWithInsufficientMaterial(pieces) {
+
+		let draws = false;
+
+		let blackPieces = chess.simulator.allAvailablePieces(pieces, 'b');
+		let whitePieces = chess.simulator.allAvailablePieces(pieces, 'w');
+
+		if (isThereInsufficientMaterial(blackPieces, whitePieces, listOfInsufficientMaterial) ||
+		    isThereInsufficientMaterial(whitePieces, blackPieces, listOfInsufficientMaterial)) {
+			draws = true;
+		}
+		else if (isThereInsufficientMaterial(blackPieces, whitePieces, unusualListOfInsufficientMaterial) ||
+		         isThereInsufficientMaterial(whitePieces, blackPieces, unusualListOfInsufficientMaterial)) {
+			
+			//	In a square of the same color ?
+			let p1Bishop = findPiece(pieces, 'w', 'b');
+			let p2Bishop = findPiece(pieces, 'b', 'b');
+
+			if (((p1Bishop.x+p1Bishop.y) % 2) === ((p2Bishop.x+p2Bishop.y) % 2)) {
+				draws = true;
+			}
+		}
+
+		return draws;
+	}
+
+	function isThereInsufficientMaterial(p1Pieces, p2Pieces, checkList) {
+
+		let insufficient = false;
+
+		parsing:
+		for (let i in checkList) {
+			let checkCase = checkList[i];
+			if (chess.utils.compareArrays(p1Pieces, checkCase.p1) &&
+				chess.utils.compareArrays(p2Pieces, checkCase.p2)) {
+				insufficient = true;
+				break parsing;
+			}
+		}
+
+		return insufficient;
 	}
 
 	var scope = {
