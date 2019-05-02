@@ -207,9 +207,9 @@ Chess.rules = (function(chess) {
 
 	function movePawn(pieces, origin, dest, roundIndex) {
 
-		let result  = new chess.Change();
-		let steps   = getSteps(origin, dest);
-		let color   = pieces[origin.y][origin.x].color;
+		let result     = new chess.Change();
+		let steps      = getSteps(origin, dest);
+		let color      = pieces[origin.y][origin.x].color;
 
 		//	Origin != destination
 		if (pieceHasMoved(origin, dest)) {
@@ -217,7 +217,12 @@ Chess.rules = (function(chess) {
 			//	Bishop movement
 			if (movePawnConditionWithoutPieceTaken(steps, origin, color)) {
 
-				result = buildResultPawnMoveOnly(result, pieces, origin, dest, color);
+				//	Piece encoutered another piece when moving
+				let increments = getIncrements(steps);
+				if (!pieceIsBlocked(pieces, origin, dest, increments)) {
+
+					result = buildResultPawnMoveOnly(result, pieces, origin, dest, color);
+				}
 			}
 			else if (movePawnConditionWithPieceTaken(steps, color)) {
 
@@ -287,6 +292,7 @@ Chess.rules = (function(chess) {
 
 		let border = (color === 'w')     ? 0  : 7;
 		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
+		let dist   = dest.y - origin.y;
 
 		if (pieces[dest.y][dest.x] === null) {
 			result.isAllowed = true;
@@ -313,7 +319,7 @@ Chess.rules = (function(chess) {
 			//	En passant
 			let decrement = (color === 'w') ? 1 : -1;
 			let taken     = pieces[dest.y+decrement][dest.x];
-			if (taken !== null && taken.hasRushed && taken.last === (roundIndex-1)) {
+			if (taken !== null && /*taken.type === 'p' &&*/ taken.hasRushed && taken.last === (roundIndex-1)) {
 				//	En passant succeed
 				result.isAllowed = true;
 				result.remove.push({ x: dest.x, y: dest.y+decrement });

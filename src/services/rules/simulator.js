@@ -227,14 +227,68 @@ Chess.simulator = (function(chess) {
 				pieces[move.y2][move.x2] = pieces[move.y1][move.x1];
 				pieces[move.y1][move.x1] = null;
 				pieces[move.y2][move.x2].last = roundIndex;
-				if (!pieces[move.y2][move.x2].hasRushed) {
-					pieces[move.y2][move.x2].hasRushed = hasRushed(pieces[move.y2][move.x2], move.y1, move.y2);
-				}
+				pieces[move.y2][move.x2].hasRushed = hasRushed(pieces[move.y2][move.x2], move.y1, move.y2);
 				if (type != null) {
 					pieces[move.y2][move.x2].type = type;
 				}
 			}
 		},
+
+		/*
+		applyChanges: function(pieces, roundIndex, changes) {
+
+			let removedPieces = new Array();
+			let movedPieces   = new Array();
+
+			for (let remove of changes.remove) {
+				removedPieces.push({
+					x: remove.x,
+					y: remove.y,
+					piece: pieces[remove.y][remove.x]
+				});
+				pieces[remove.y][remove.x] = null;
+			}
+
+			for (let move of changes.move) {
+
+				movedPieces.push({
+					x1: move.x1, y1: move.y1,
+					x2: move.x2, y2: move.y2,
+					last: pieces[move.y1][move.x1].last,
+					type: pieces[move.y1][move.x1].type,
+					hasRushed: pieces[move.y1][move.x1].hasRushed
+				});
+
+				let type = (move.type == null) ? null : move.type;
+				pieces[move.y2][move.x2] = pieces[move.y1][move.x1];
+				pieces[move.y1][move.x1] = null;
+				pieces[move.y2][move.x2].last = roundIndex;
+				pieces[move.y2][move.x2].hasRushed = hasRushed(pieces[move.y2][move.x2], move.y1, move.y2);
+				if (type != null) {
+					pieces[move.y2][move.x2].type = type;
+				}
+			}
+
+			return {
+				removedPieces: removedPieces,
+				movedPieces:   movedPieces
+			};
+		},
+
+		cancelChanges: function(pieces, roundIndex, changesToCancel) {
+
+			for (let move of changesToCancel.movedPieces) {
+				pieces[move.y1][move.x1] = pieces[move.y2][move.x2];
+				pieces[move.y2][move.x2] = null;
+				pieces[move.y1][move.x1].last      = move.last;
+				pieces[move.y1][move.x1].type      = move.type;
+				pieces[move.y1][move.x1].hasRushed = move.hasRushed;
+			}
+
+			for (let remove of changesToCancel.removedPieces) {
+				pieces[remove.y][remove.x] = remove.piece;
+			}
+		},*/
 
 		allAvailablePiecesPositions: function(pieces, color) {
 

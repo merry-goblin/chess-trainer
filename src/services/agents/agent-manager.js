@@ -156,7 +156,7 @@ var Chess = Chess || {};
 
 				window.setTimeout(function() {
 					currentAgent.playSelection(controller.pieces);
-				}, 10);
+				}, 250);
 			},
 
 			/**

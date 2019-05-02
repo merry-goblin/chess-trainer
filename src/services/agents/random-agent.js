@@ -25,6 +25,55 @@ var Chess = Chess || {};
 
 		/*** Private methods ***/
 
+		function getAvailablePiecesPositions(pieces, color) {
+
+			let availablePieces = chess.simulator.allAvailablePiecesPositions(pieces, agentColor);
+
+			return availablePieces;
+		}
+
+		function getAvailablePiecesMovements(pieces, round, availablePieces) {
+
+			let availablePiecesMovements = new Array();
+			for (let i=0, nb=availablePieces.length; i<nb; i++) {
+
+				let availablePieceMovement = chess.simulator.allPieceMoves(pieces, availablePieces[i], round);
+				availablePiecesMovements.push(availablePieceMovement);
+			}
+
+			return availablePiecesMovements;
+		}
+
+		function chooseAMove(availablePieces, availablePiecesMovements) {
+
+			let totalAllowedMovements = 0;
+			for (let i=0, nb=availablePieces.length; i<nb; i++) {
+				totalAllowedMovements += availablePiecesMovements[i].length;
+			}
+
+			let number = chess.utils.getRandomInt(0, totalAllowedMovements);
+
+			return number;
+		}
+
+		function applyMovement(availablePieces, availablePiecesMovements, number) {
+
+			let count  = 0;
+
+			chooseMovement:
+			for (let i=0, nbPieces=availablePieces.length; i<nbPieces; i++) {
+				for (let y=0, nbMovements=availablePiecesMovements[i].length; y<nbMovements; y++) {
+
+					if (number === count) {
+						movement = availablePiecesMovements[i][y];
+						callbackSelection(availablePieces[i]);
+						break chooseMovement;
+					}
+					count++;
+				}
+			}
+		}
+
 		/**
 		 * Free any pointer stored on this object
 		 * @return null
@@ -57,32 +106,13 @@ var Chess = Chess || {};
 			//	AI only
 			playSelection: function(pieces) {
 
-				let totalAllowedMovements = 0;
+				let availablePieces           = getAvailablePiecesPositions(pieces, agentColor);
+				let availablePiecesMovements  = getAvailablePiecesMovements(pieces, roundIndex, availablePieces);
 
-				let availablePieces = chess.simulator.allAvailablePiecesPositions(pieces, agentColor);
-				let availablePiecesMovements = new Array();
-				for (let i=0, nb=availablePieces.length; i<nb; i++) {
+				//	Choose of a move
+				let number = chooseAMove(availablePieces, availablePiecesMovements);
 
-					let availablePieceMovement = chess.simulator.allPieceMoves(pieces, availablePieces[i], roundIndex);
-					totalAllowedMovements += availablePieceMovement.length;
-					availablePiecesMovements.push(availablePieceMovement);
-				}
-
-				let numero = chess.utils.getRandomInt(0, totalAllowedMovements);
-				let count  = 0;
-
-				chooseMovement:
-				for (let i=0, nbPieces=availablePieces.length; i<nbPieces; i++) {
-					for (let y=0, nbMovements=availablePiecesMovements[i].length; y<nbMovements; y++) {
-
-						if (numero === count) {
-							movement = availablePiecesMovements[i][y];
-							callbackSelection(availablePieces[i]);
-							break chooseMovement;
-						}
-						count++;
-					}
-				}
+				applyMovement(availablePieces, availablePiecesMovements, number);
 			},
 
 			//	AI only
