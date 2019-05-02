@@ -42,7 +42,7 @@ open index.html in a web browser to start playing
 	(function($, chess) {
 
 		let whiteAgent  = new chess.PlayerAgent();
-		let blackAgent  = new chess.RandomAgent();
+		let blackAgent  = new chess.MinMaxAgent();
 		let customModel = null;
 
 		var mainController = new chess.Main();
@@ -87,7 +87,4 @@ open index.html in a web browser to start playing
 
 - PlayerAgent : use mouse click on pieces to be triggered
 - RandomAgent : play randomly among available moves
-
-### Agents to come
-
 - MinMaxAgent : play the best solution according to scores on actions and a maximum of iterations

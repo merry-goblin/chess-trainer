@@ -30,12 +30,12 @@ var Chess = Chess || {};
 			k: 1000, // Checkmate
 			q: 25,
 			r: 18,
-			b: 15,
-			n: 12,
+			b: 18,
+			n: 18,
 			p: 5
 		};
-		var checkCost = 1;
-		var drawsCost = -1;
+		var checkCost = 2;
+		var drawsCost = -2;
 
 		/*** Private methods ***/
 
@@ -58,7 +58,7 @@ var Chess = Chess || {};
 				value += piecesCost.k * factor;
 			}
 
-			//value += chess.utils.getRandomInt(-3, 3);
+			value += chess.utils.getRandomInt(-3, 3);
 
 			return value;
 		}
