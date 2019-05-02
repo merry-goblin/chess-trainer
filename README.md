@@ -41,8 +41,13 @@ open index.html in a web browser to start playing
 
 	(function($, chess) {
 
+		//	MinMaxAgent's settings
+		let settings = {
+			depth: 2 // Set to 3 if you have got a good processor
+		};
+
 		let whiteAgent  = new chess.PlayerAgent();
-		let blackAgent  = new chess.MinMaxAgent();
+		let blackAgent  = new chess.MinMaxAgent(settings);
 		let customModel = null;
 
 		var mainController = new chess.Main();
