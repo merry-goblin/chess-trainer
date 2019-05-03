@@ -239,8 +239,14 @@ var Chess = Chess || {};
 			//	AI only
 			playSelection: function(pieces) {
 
+				/*let startTime = new Date().getTime();
+				let elapsedTime = 0;*/
+
 				//	Choose of a move
 				let result = max(pieces, settings.depth, agentColor, roundIndex);
+
+				/*elapsedTime = new Date().getTime() - startTime;
+				console.log((elapsedTime/1000)+" secondes");*/
 
 				window.setTimeout(function() {
 					applyMovement(result.move.origin, result.move.dest);
