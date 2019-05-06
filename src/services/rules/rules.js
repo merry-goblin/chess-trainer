@@ -235,18 +235,18 @@ Chess.rules = (function(chess) {
 
 	function getSteps(origin, dest) {
 
-		return {
-			x: dest.x - origin.x,
-			y: dest.y - origin.y,
-		}
+		let x = dest.x - origin.x;
+		let y = dest.y - origin.y;
+
+		return new chess.Position(x, y);
 	}
 
 	function getIncrements(steps) {
 
-		return {
-			x: getIncrement(steps.x),
-			y: getIncrement(steps.y)
-		}
+		let x = getIncrement(steps.x);
+		let y = getIncrement(steps.y);
+
+		return new chess.Position(x, y);
 	}
 
 	function getIncrement(step) {
@@ -264,10 +264,10 @@ Chess.rules = (function(chess) {
 
 	function getNextPosition(position, increments) {
 
-		return {
-			x: position.x+increments.x,
-			y: position.y+increments.y
-		};
+		let x = position.x+increments.x;
+		let y = position.y+increments.y;
+
+		return new chess.Position(x, y);
 	}
 
 	function buildResult(result, pieces, origin, dest) {
@@ -279,10 +279,10 @@ Chess.rules = (function(chess) {
 		else if (pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
 			//	A piece is taken of a different color
 			result.isAllowed = true;
-			result.remove.push({ x: dest.x, y: dest.y });
+			result.remove.push(new chess.Position(dest.x, dest.y));
 		}
 		if (result.isAllowed) {
-			result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
+			result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y, null));
 		}
 
 		return result;
@@ -296,7 +296,7 @@ Chess.rules = (function(chess) {
 
 		if (pieces[dest.y][dest.x] === null) {
 			result.isAllowed = true;
-			result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y, type: type });
+			result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y, type));
 		}
 
 		return result;
@@ -311,8 +311,8 @@ Chess.rules = (function(chess) {
 			if (pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
 				//	A piece is taken of a different color
 				result.isAllowed = true;
-				result.remove.push({ x: dest.x, y: dest.y });
-				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y, type: type });
+				result.remove.push(new chess.Position(dest.x, dest.y));
+				result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y, type));
 			}
 		}
 		else {
@@ -322,8 +322,8 @@ Chess.rules = (function(chess) {
 			if (taken !== null && /*taken.type === 'p' &&*/ taken.hasRushed && taken.last === (roundIndex-1)) {
 				//	En passant succeed
 				result.isAllowed = true;
-				result.remove.push({ x: dest.x, y: dest.y+decrement });
-				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y, type: type });
+				result.remove.push(new chess.Position(dest.x, dest.y+decrement));
+				result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y, type));
 			}
 		}
 
@@ -385,11 +385,11 @@ Chess.rules = (function(chess) {
 				//	Todo : king check is forbidden on any case of the king journey 
 				//	including the start position and obviously the destination
 
-				let rookDestinationY = (rookPosition.x === 0) ? 3 : 5;
+				let rookDestinationX = (rookPosition.x === 0) ? 3 : 5;
 
 				result.isAllowed = true;
-				result.move.push({ x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y });
-				result.move.push({ x1: rookPosition.x, y1: rookPosition.y, x2: rookDestinationY, y2: rookPosition.y });
+				result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y));
+				result.move.push(new chess.Move(rookPosition.x, rookPosition.y, rookDestinationX, rookPosition.y));
 			}
 		}
 
@@ -413,7 +413,7 @@ Chess.rules = (function(chess) {
 			for (let x=0; x<8; x++) {
 				let piece = pieces[y][x];
 				if (piece !== null && piece.type === type && piece.color === color) {
-					position = {x: x, y: y};
+					position = new chess.Position(x, y);
 					break find;
 				}
 			}
@@ -476,7 +476,7 @@ Chess.rules = (function(chess) {
 				if (y !== kingPosition.y || x !== kingPosition.x) {
 					let piece = pieces[y][x];
 					if (piece !== null && piece.color !== color) {
-						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
+						let result = chess.rules.movePiece(pieces, new chess.Position(x, y), kingPosition, roundIndex, false);
 						if (result.isAllowed) {
 							changes = new chess.Change();
 							break simulation;
@@ -508,7 +508,7 @@ Chess.rules = (function(chess) {
 				if (y !== kingPosition.y || x !== kingPosition.x) {
 					let piece = pieces[y][x];
 					if (piece !== null && piece.color !== color) {
-						let result = chess.rules.movePiece(pieces, {x:x, y:y}, kingPosition, roundIndex, false);
+						let result = chess.rules.movePiece(pieces, new chess.Position(x, y), kingPosition, roundIndex, false);
 						if (result.isAllowed) {
 							opponentIsInCheck = true;
 							break simulation;

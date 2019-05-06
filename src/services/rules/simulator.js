@@ -40,7 +40,7 @@ Chess.simulator = (function(chess) {
 			if (piece !== null && piece.color === pieceToMove.color) {
 				break;
 			}
-			availableMoves.push({x: piecePosition.x, y: y});
+			availableMoves.push(new chess.Position(piecePosition.x, y));
 		}
 
 		//	To top
@@ -49,7 +49,7 @@ Chess.simulator = (function(chess) {
 			if (piece !== null && piece.color === pieceToMove.color) {
 				break;
 			}
-			availableMoves.push({x: piecePosition.x, y: y});
+			availableMoves.push(new chess.Position(piecePosition.x, y));
 		}
 
 		//	To right
@@ -58,7 +58,7 @@ Chess.simulator = (function(chess) {
 			if (piece !== null && piece.color === pieceToMove.color) {
 				break;
 			}
-			availableMoves.push({x: x, y: piecePosition.y});
+			availableMoves.push(new chess.Position(x, piecePosition.y));
 		}
 
 		//	To left
@@ -67,7 +67,7 @@ Chess.simulator = (function(chess) {
 			if (piece !== null && piece.color === pieceToMove.color) {
 				break;
 			}
-			availableMoves.push({x: x, y: piecePosition.y});
+			availableMoves.push(new chess.Position(x, piecePosition.y));
 		}
 
 		return availableMoves;
@@ -86,7 +86,7 @@ Chess.simulator = (function(chess) {
 			if (isInChessboard(posX) && isInChessboard(posY)) {
 				piece = pieces[posY][posX];
 				if (piece === null || piece.color !== pieceToMove.color) {
-					availableMoves.push({x: posX, y: posY});
+					availableMoves.push(new chess.Position(posX, posY));
 				}
 			}
 		}
@@ -106,7 +106,7 @@ Chess.simulator = (function(chess) {
 				if (piece !== null && piece.color === pieceToMove.color) {
 					break;
 				}
-				availableMoves.push({x: posX, y: posY});
+				availableMoves.push(new chess.Position(posX, posY));
 			}
 		}
 
@@ -118,7 +118,7 @@ Chess.simulator = (function(chess) {
 				if (piece !== null && piece.color === pieceToMove.color) {
 					break
 				}
-				availableMoves.push({x: posX, y: posY});
+				availableMoves.push(new chess.Position(posX, posY));
 			}
 		}
 
@@ -130,7 +130,7 @@ Chess.simulator = (function(chess) {
 				if (piece !== null && piece.color === pieceToMove.color) {
 					break;
 				}
-				availableMoves.push({x: posX, y: posY});
+				availableMoves.push(new chess.Position(posX, posY));
 			}
 		}
 
@@ -142,7 +142,7 @@ Chess.simulator = (function(chess) {
 				if (piece !== null && piece.color === pieceToMove.color) {
 					break;
 				}
-				availableMoves.push({x: posX, y: posY});
+				availableMoves.push(new chess.Position(posX, posY));
 			}
 		}
 
@@ -170,7 +170,7 @@ Chess.simulator = (function(chess) {
 				if (isInChessboard(posX) && isInChessboard(posY)) {
 					piece = pieces[posY][posX];
 					if (piece === null || piece.color !== pieceToMove.color) {
-						availableMoves.push({x: posX, y: posY});
+						availableMoves.push(new chess.Position(posX, posY));
 					}
 				}
 			}
@@ -191,7 +191,7 @@ Chess.simulator = (function(chess) {
 		if (isInChessboard(posY)) {
 			piece = pieces[posY][piecePosition.x];
 			if (piece === null) {
-				availableMoves.push({x: piecePosition.x, y: posY});
+				availableMoves.push(new chess.Position(piecePosition.x, posY));
 
 				//	Runs straight forward (two cases)
 				posY = posY+factor;
@@ -199,7 +199,7 @@ Chess.simulator = (function(chess) {
 					if (pieceToMove.last === 0) {
 						piece = pieces[posY][piecePosition.x];
 						if (piece === null) {
-							availableMoves.push({x: piecePosition.x, y: posY});
+							availableMoves.push(new chess.Position(piecePosition.x, posY));
 						}
 					}
 				}
@@ -215,7 +215,7 @@ Chess.simulator = (function(chess) {
 
 				if (piece !== null) {
 					if (piece.color !== pieceToMove.color) {
-						availableMoves.push({x: posX, y: posY});
+						availableMoves.push(new chess.Position(posX, posY));
 					}
 				}
 				else {
@@ -223,7 +223,7 @@ Chess.simulator = (function(chess) {
 					let rusher = pieces[piecePosition.y][posX];
 					if (rusher !== null && rusher.color !== pieceToMove.color) {
 						if (rusher.hasRushed && rusher.last === (roundIndex-1)) {
-							availableMoves.push({x: posX, y: posY});
+							availableMoves.push(new chess.Position(posX, posY));
 						}
 					}
 				}
@@ -320,7 +320,7 @@ Chess.simulator = (function(chess) {
 				for (let x=0; x<8; x++) {
 					let piece = pieces[y][x];
 					if (piece !== null && piece.color === color) {
-						availablePieces.push({x: x, y: y});
+						availablePieces.push(new chess.Position(x, y));
 					}
 				}
 			}

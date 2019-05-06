@@ -337,7 +337,7 @@ var Chess = Chess || {};
 
 				initUI();
 
-				this.update();
+				self.update();
 			},
 
 			initEventRegistering: function() {
@@ -350,7 +350,7 @@ var Chess = Chess || {};
 				erasePieces();
 				createPieces();
 
-				this.update();
+				self.update();
 			},
 
 			applyChanges: function(changes) {
@@ -365,6 +365,8 @@ var Chess = Chess || {};
 				}
 
 				applyState(changes);
+
+				self.update();
 			},
 
 			debug: function() {
@@ -384,6 +386,8 @@ var Chess = Chess || {};
 
 				let roundIndex = controller.getRuleManager().getRoundIndex();
 				changeRoundIndex(roundIndex);
+
+				self.update();
 			},
 
 			/**
