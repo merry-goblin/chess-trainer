@@ -42,9 +42,10 @@ var Chess = Chess || {};
 		function evaluate(pieces, changes, factor) {
 
 			let value = 0;
+			let piece = null;
 
 			for (let remove of changes.remove) {
-				let piece = pieces[remove.y][remove.x];
+				piece = pieces[remove.y][remove.x];
 				value += piecesCost[piece.type] * factor;
 			}
 
@@ -239,14 +240,14 @@ var Chess = Chess || {};
 			//	AI only
 			playSelection: function(pieces) {
 
-				/*let startTime = new Date().getTime();
-				let elapsedTime = 0;*/
+				let startTime = new Date().getTime();
+				let elapsedTime = 0;
 
 				//	Choose of a move
 				let result = max(pieces, settings.depth, agentColor, roundIndex);
 
-				/*elapsedTime = new Date().getTime() - startTime;
-				console.log((elapsedTime/1000)+" secondes");*/
+				elapsedTime = new Date().getTime() - startTime;
+				console.log((elapsedTime/1000)+" secondes");
 
 				window.setTimeout(function() {
 					applyMovement(result.move.origin, result.move.dest);

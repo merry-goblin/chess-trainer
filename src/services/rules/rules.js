@@ -540,17 +540,17 @@ Chess.rules = (function(chess) {
 		simulation: {
 			//	Every available pieces for the opponent
 			let allAvailablePieces = chess.simulator.allAvailablePiecesPositions(pieces, color); // [{x,y},...]
-			for (let pieceIndex in allAvailablePieces) {
+			for (let pieceIndex=0, nbPieces=allAvailablePieces.length; pieceIndex<nbPieces; pieceIndex++) {
 				let piecePosition = allAvailablePieces[pieceIndex];
 
 				//	Every possible moves for the opponent
 				let allPieceMoves = chess.simulator.allPieceMoves(pieces, piecePosition, roundIndex);
-				for (let moveIndex in allPieceMoves) {
+				for (let moveIndex=0, nbMoves=allPieceMoves.length; moveIndex<nbMoves; moveIndex++) {
 					let pieceMove = allPieceMoves[moveIndex];
 
 					//	Simulate move
-					let changes = chess.rules.movePiece(pieces, piecePosition, pieceMove, roundIndex, false);
-					let nextPieces   = chess.utils.copyArray(pieces);
+					let changes     = chess.rules.movePiece(pieces, piecePosition, pieceMove, roundIndex, false);
+					let nextPieces  = chess.utils.copyArray(pieces);
 					chess.simulator.applyChanges(nextPieces, roundIndex, changes);
 
 					changes = selfInCheck(nextPieces, roundIndex2, changes, color);
@@ -583,12 +583,12 @@ Chess.rules = (function(chess) {
 		simulation: {
 			//	Every available pieces for the opponent
 			let allAvailablePieces = chess.simulator.allAvailablePiecesPositions(pieces, color); // [{x,y},...]
-			for (let pieceIndex in allAvailablePieces) {
+			for (let pieceIndex=0, nbPieces=allAvailablePieces.length; pieceIndex<nbPieces; pieceIndex++) {
 				let piecePosition = allAvailablePieces[pieceIndex];
 
 				//	Every possible moves for the opponent
 				let allPieceMoves = chess.simulator.allPieceMoves(pieces, piecePosition, roundIndex);
-				for (let moveIndex in allPieceMoves) {
+				for (let moveIndex=0, nbMoves=allPieceMoves.length; moveIndex<nbMoves; moveIndex++) {
 					let pieceMove = allPieceMoves[moveIndex];
 
 					//	Simulate move
@@ -644,7 +644,7 @@ Chess.rules = (function(chess) {
 		let insufficient = false;
 
 		parsing:
-		for (let i in checkList) {
+		for (let i=0, nb=checkList; i<nb; i++) {
 			let checkCase = checkList[i];
 			if (chess.utils.compareArrays(p1Pieces, checkCase.p1) &&
 				chess.utils.compareArrays(p2Pieces, checkCase.p2)) {
