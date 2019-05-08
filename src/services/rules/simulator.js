@@ -14,8 +14,8 @@ Chess.simulator = (function(chess) {
 
 		let result = false;
 
-		if (piece.type === 'p') {
-			let factor  = (piece.color === 'b') ? 1 : -1;
+		if (piece.type === chess.types.pawn) {
+			let factor  = (piece.color === chess.colors.black) ? 1 : -1;
 			let y       = (y2 - y1) * factor;
 			result      = (y == 2) ? true : false;
 		}
@@ -97,10 +97,12 @@ Chess.simulator = (function(chess) {
 	function availableBishopMoves(pieces, piecePosition, pieceToMove, availableMoves) {
 
 		let piece = null;
+		let posX  = 0;
+		let posY  = 0;
 
 		for (let i=1; (piecePosition.x+i<8 && piecePosition.y+i<8); i++) {
-			let posX = piecePosition.x+i;
-			let posY = piecePosition.y+i;
+			posX = piecePosition.x+i;
+			posY = piecePosition.y+i;
 			if (isInChessboard(posX) && isInChessboard(posY)) {
 				piece = pieces[posY][posX];
 				if (piece !== null && piece.color === pieceToMove.color) {
@@ -111,8 +113,8 @@ Chess.simulator = (function(chess) {
 		}
 
 		for (let i=1; (piecePosition.x+i<8 && piecePosition.y-i>=0); i++) {
-			let posX = piecePosition.x+i;
-			let posY = piecePosition.y-i;
+			posX = piecePosition.x+i;
+			posY = piecePosition.y-i;
 			if (isInChessboard(posX) && isInChessboard(posY)) {
 				piece = pieces[posY][posX];
 				if (piece !== null && piece.color === pieceToMove.color) {
@@ -123,8 +125,8 @@ Chess.simulator = (function(chess) {
 		}
 
 		for (let i=1; (piecePosition.x-i>=0 && piecePosition.y+i<8); i++) {
-			let posX = piecePosition.x-i;
-			let posY = piecePosition.y+i;
+			posX = piecePosition.x-i;
+			posY = piecePosition.y+i;
 			if (isInChessboard(posX) && isInChessboard(posY)) {
 				piece = pieces[posY][posX];
 				if (piece !== null && piece.color === pieceToMove.color) {
@@ -135,8 +137,8 @@ Chess.simulator = (function(chess) {
 		}
 
 		for (let i=1; (piecePosition.x-i>=0 && piecePosition.y-i>=0); i++) {
-			let posX = piecePosition.x-i;
-			let posY = piecePosition.y-i;
+			posX = piecePosition.x-i;
+			posY = piecePosition.y-i;
 			if (isInChessboard(posX) && isInChessboard(posY)) {
 				piece = pieces[posY][posX];
 				if (piece !== null && piece.color === pieceToMove.color) {
@@ -162,11 +164,13 @@ Chess.simulator = (function(chess) {
 	function availableKingMoves(pieces, piecePosition, pieceToMove, availableMoves) {
 
 		let piece = null;
+		let posX  = 0;
+		let posY  = 0;
 
 		for (y=-1; y<=1; y++) {
 			for (x=-1; x<=1; x++) {
-				let posX = piecePosition.x+x;
-				let posY = piecePosition.y+y;
+				posX = piecePosition.x+x;
+				posY = piecePosition.y+y;
 				if (isInChessboard(posX) && isInChessboard(posY)) {
 					piece = pieces[posY][posX];
 					if (piece === null || piece.color !== pieceToMove.color) {
@@ -182,9 +186,9 @@ Chess.simulator = (function(chess) {
 	function availablePawnMoves(pieces, piecePosition, pieceToMove, availableMoves, roundIndex) {
 
 		let piece  = null;
-		let factor = (pieceToMove.color === 'b') ? 1 : -1;
-		let posX = null;
-		let posY = null;
+		let factor = (pieceToMove.color === chess.colors.black) ? 1 : -1;
+		let posX = 0;
+		let posY = 0;
 
 		//	Straight forward
 		posY = piecePosition.y+factor;
@@ -245,13 +249,12 @@ Chess.simulator = (function(chess) {
 			}
 
 			for (let move of changes.move) {
-				let type = (move.type == null) ? null : move.type;
 				pieces[move.y2][move.x2] = pieces[move.y1][move.x1];
 				pieces[move.y1][move.x1] = null;
 				pieces[move.y2][move.x2].last = roundIndex;
 				pieces[move.y2][move.x2].hasRushed = hasRushed(pieces[move.y2][move.x2], move.y1, move.y2);
-				if (type != null) {
-					pieces[move.y2][move.x2].type = type;
+				if (move.type !== chess.types.null) {
+					pieces[move.y2][move.x2].type = move.type;
 				}
 			}
 		},
@@ -350,28 +353,41 @@ Chess.simulator = (function(chess) {
 			let piece          = pieces[piecePosition.y][piecePosition.x];
 
 			switch (piece.type) {
-				case 'r':
+				case chess.types.rook:
 					availableMoves = availableRookMoves(pieces, piecePosition, piece, availableMoves);
 					break;
-				case 'n': // knight
+				case chess.types.knight:
 					availableMoves = availableKnightMoves(pieces, piecePosition, piece, availableMoves);
 					break;
-				case 'b':
+				case chess.types.bishop:
 					availableMoves = availableBishopMoves(pieces, piecePosition, piece, availableMoves);
 					break;
-				case 'q':
+				case chess.types.queen:
 					availableMoves = availableQueenMoves(pieces, piecePosition, piece, availableMoves);
 					break;
-				case 'k':
+				case chess.types.king:
 					availableMoves = availableKingMoves(pieces, piecePosition, piece, availableMoves);
 					break;
-				case 'p':
+				case chess.types.pawn:
 					availableMoves = availablePawnMoves(pieces, piecePosition, piece, availableMoves, roundIndex);
 					break;
 			}
 
 			return availableMoves;
+		},
+
+		allPiecesMoves: function(pieces, round, availablePieces) {
+
+			let availablePiecesMovements = new Array();
+			for (let i=0, nb=availablePieces.length; i<nb; i++) {
+
+				let availablePieceMovement = chess.simulator.allPieceMoves(pieces, availablePieces[i], round);
+				availablePiecesMovements.push(availablePieceMovement);
+			}
+
+			return availablePiecesMovements;
 		}
+
 	}
 	return scope;
 

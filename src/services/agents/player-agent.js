@@ -15,7 +15,7 @@ var Chess = Chess || {};
 
 		var settings = $.extend({}, settings);
 
-		var color = null;
+		var color = chess.colors.null;
 
 		var callbackSelection = null;
 		var callbackMovement  = null;

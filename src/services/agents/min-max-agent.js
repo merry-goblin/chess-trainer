@@ -17,171 +17,178 @@ var Chess = Chess || {};
 			depth: 2
 		}, settings);
 
-		var agentColor = null;
-		var roundIndex = null;
+		var isActive = false;
+
+		var agentColor = chess.colors.null;
+		var roundIndex = 0;
 
 		var callbackSelection = null;
 		var callbackMovement  = null;
 
 		var movement = null;
 
-		//	Evaluation
-		var piecesCost = {
-			k: 1000, // Checkmate
-			q: 25,
-			r: 18,
-			b: 18,
-			n: 18,
-			p: 5
-		};
-		var checkCost = 2;
-		var drawsCost = -2;
+		var workers              = null;
+		var numberOfWorkersReady = 0;
+
+		var browsing = null;
+
+		var startTime   = 0;
+		var elapsedTime = 0;
 
 		/*** Private methods ***/
 
-		function evaluate(pieces, changes, factor) {
+		//	*** Workers ***
 
-			let value = 0;
-			let piece = null;
+		/**
+		 * @return null
+		 */
+		function initWorkers() {
 
-			for (let remove of changes.remove) {
-				piece = pieces[remove.y][remove.x];
-				value += piecesCost[piece.type] * factor;
+			numberOfWorkersReady = 0;
+			workers = new Array(chess.config.numberOfWorkers);
+			for (let i=0; i<chess.config.numberOfWorkers; i++) {
+
+				workers[i] = new Chess.Worker();
+
+				let worker = new Worker('src/services/agents/min-max-worker.js');
+				workers[i].worker = worker;
+
+				worker.addEventListener('message', function(e) {
+					messageFromWorker(e.data);
+				});
+				worker.state = 'loading';
+				worker.postMessage({
+					id: i,
+					num: 0,
+					action: 'load',
+					params: null
+				});
 			}
-
-			if (changes.opponentIsInCheck) {
-				value += checkCost * factor;
-			}
-			if (changes.draws) {
-				value += drawsCost * factor;
-			}
-			if (changes.opponentIsInCheckmate) {
-				value += piecesCost.k * factor;
-			}
-
-			value += chess.utils.getRandomInt(-3, 3);
-
-			return value;
 		}
 
-		function evaluateMax(pieces, changes) {
+		function getAvailableWorkerId() {
 
-			return evaluate(pieces, changes, 1);
-		}
+			let workerId = null;
 
-		function evaluateMin(pieces, changes) {
-
-			return evaluate(pieces, changes, -1);
-		}
-
-		function max(pieces, depth, color, round) {
-
-			let move = {
-				origin: null,
-				dest:   null
-			};
-			let maxValue = Number.NEGATIVE_INFINITY;
-
-			let verifyCheck  = true;
-			let nextColor    = chess.utils.switchColor(color);
-			let nextRound    = round+1;
-			let nextDepth    = depth-1;
-
-			let availablePieces           = getAvailablePiecesPositions(pieces, color);
-			let availablePiecesMovements  = getAvailablePiecesMovements(pieces, round, availablePieces);
-
-			let count = 0;
-			for (let p=0, nbPieces=availablePieces.length; p<nbPieces; p++) {
-				let origin = availablePieces[p];
-				for (let m=0, nbMovements=availablePiecesMovements[p].length; m<nbMovements; m++) {
-
-					//	Simulation of the current possible move
-					let dest     = availablePiecesMovements[p][m];
-					let changes  = chess.rules.movePiece(pieces, origin, dest, roundIndex, verifyCheck);
-					if (changes.isAllowed) {
-
-						let value = evaluateMax(pieces, changes);
-
-						if (depth > 0 && changes.opponentIsInCheckmate === false && changes.draws === false) {
-
-							//	Building of a new chessboard according to the current move
-							let nextPieces = chess.utils.copyArray(pieces);
-							chess.simulator.applyChanges(nextPieces, round, changes);
-
-							//	Calculation of move value
-							let result = min(nextPieces, nextDepth, nextColor, nextRound, count);
-							value     += result.value;
-						}
-
-						if (value > maxValue) {
-							maxValue    = value;
-							move.origin = origin;
-							move.dest   = dest;
-						}
-					}
-					count++;
+			for (let i=0; i<chess.config.numberOfWorkers; i++) {
+				if (workers[i].state === 'loaded' || workers[i].state === 'browsed') {
+					workerId = i;
+					break;
 				}
 			}
 
-			return {
-				value: maxValue,
-				move:  move
-			};
+			return workerId;
 		}
 
-		function min(pieces, depth, color, round) {
+		function messageFromWorker(message) {
 
-			let move      = {
-				origin: null,
-				dest:   null
-			};
-			let minValue = Number.POSITIVE_INFINITY;
+			switch (message.state) {
+				case 'loaded':
+					evalWorkerLoaded(message.id, message.num, message.state, message.response);
+					break;
+				case 'browsed':
+					evalWorkerResponse(message.id, message.num, message.state, message.response);
+					break;
+			}
+		}
 
-			let verifyCheck  = true;
-			let nextColor  = chess.utils.switchColor(color);
-			let nextRound  = round+1;
-			let nextDepth  = depth-1;
+		function evalWorkerLoaded(workerId, processNumber, state, value) {
 
-			let availablePieces           = getAvailablePiecesPositions(pieces, color);
-			let availablePiecesMovements  = getAvailablePiecesMovements(pieces, round, availablePieces);
+			numberOfWorkersReady++;
+			workers[workerId].state = state;
+			if (isActive && numberOfWorkersReady >= chess.config.numberOfWorkers) {
+				browse();
+			}
+		}
 
-			let count = 0;
-			for (let p=0, nbPieces=availablePieces.length; p<nbPieces; p++) {
-				let origin = availablePieces[p];
-				for (let m=0, nbMovements=availablePiecesMovements[p].length; m<nbMovements; m++) {
+		function evalWorkerResponse(workerId, processNumber, state, value) {
 
-					//	Simulation of the current possible move
-					let dest     = availablePiecesMovements[p][m];
-					let changes  = chess.rules.movePiece(pieces, origin, dest, roundIndex, verifyCheck);
-					if (changes.isAllowed) {
-
-						let value = evaluateMin(pieces, changes);
-						if (depth > 0 && changes.opponentIsInCheckmate === false && changes.draws === false) {
-
-							//	Building of a new chessboard according to the current move
-							let nextPieces = chess.utils.copyArray(pieces);
-							chess.simulator.applyChanges(nextPieces, round, changes);
-
-							//	Calculation of move value
-							let result = max(nextPieces, nextDepth, nextColor, nextRound);
-							value     += result.value;
-						}
-
-						if (value < minValue) {
-							minValue    = value;
-							move.origin = origin;
-							move.dest   = dest;
-						}
-					}
-					count++;
-				}
+			workers[workerId].state  = state;
+			if (browsing.bestScore < value) {
+				browsing.bestScore = value;
+				browsing.bestMove  = processNumber;
 			}
 
-			return {
-				value: minValue,
-				move:  move
-			};
+			//	Check if all moves have been evaluated
+			browsing.numberOfEval++;
+			if (browsing.numberOfEval === browsing.totalMoves) {
+
+				//	End
+				let move = searchMove(browsing.bestMove);
+
+				window.setTimeout(function() {
+					applyMove(move.origin, move.dest);
+				}, 100);
+
+				elapsedTime = new Date().getTime() - startTime;
+				/*console.log((elapsedTime/1000)+" secondes");*/
+			}
+			else {
+				browse();
+			}
 		}
+
+		function prepareBrowsing(pieces, depth, color, round) {
+
+			browsing = new chess.Browsing();
+
+			browsing.pieces                    = pieces;
+			browsing.depth                     = depth;
+			browsing.color                     = color;
+			browsing.round                     = round;
+			browsing.bestScore                 = Number.NEGATIVE_INFINITY;
+			browsing.bestMove                  = 0;
+			browsing.currentMove               = 0;
+			browsing.numberOfEval              = 0;
+			browsing.availablePieces           = getAvailablePiecesPositions(pieces, color);
+			browsing.availablePiecesMovements  = getAvailablePiecesMovements(pieces, round, browsing.availablePieces);
+
+			//	Number of moves
+			let count = 0;
+			for (let p=0, nbPieces=browsing.availablePieces.length; p<nbPieces; p++) {
+				count += browsing.availablePiecesMovements[p].length;
+			}
+			browsing.totalMoves = count;
+		}
+
+		/**
+		 * We put available workers to work
+		 * One worker evaluates one move
+		 *
+		 * @param  array[Chess.Piece] pieces
+		 * @param  integer            depth
+		 * @param  integer            color
+		 * @param  integer            round
+		 * @return null
+		 */
+		function browse() {
+
+			simulation:
+			while (browsing.currentMove < browsing.totalMoves) {
+
+				//	Worker
+				let workerId = getAvailableWorkerId();
+				if (workerId === null) {
+					break simulation;
+				}
+				let worker = workers[workerId].worker;
+
+				//	Move
+				let move = searchMove(browsing.currentMove);
+
+				workers[workerId].state = 'browsing';
+				worker.postMessage({
+					id: workerId,
+					num: browsing.currentMove,
+					action: 'max',
+					params: { pieces: browsing.pieces, depth: browsing.depth, color: browsing.color, round: browsing.round, origin: move.origin, dest: move.dest }
+				});
+
+				browsing.currentMove++;
+			}
+		}
+
+		//	*** Simulator ***
 
 		function getAvailablePiecesPositions(pieces, color) {
 
@@ -202,7 +209,45 @@ var Chess = Chess || {};
 			return availablePiecesMovements;
 		}
 
-		function applyMovement(origin, dest) {
+		function searchMove(numero) {
+
+			let count = 0;
+
+			let origin;
+			let dest;
+
+			let availablePieces       = browsing.availablePieces;
+			let availablePiecesMoves  = browsing.availablePiecesMovements;
+
+			simulation:
+			for (let p=0, nbPieces=availablePieces.length; p<nbPieces; p++) {
+
+				//	We iterate through an array only if currentMove is in this array
+				let nbMoves=availablePiecesMoves[p].length;
+				if (numero < count+nbMoves) {
+
+					origin = availablePieces[p];
+					for (let m=0; m<nbMoves; m++) {
+
+						if (count === numero) {
+							dest = availablePiecesMoves[p][m];
+							break simulation;
+						}
+						count++;
+					}
+				}
+				else {
+					count += nbMoves;
+				}
+			}
+
+			return {
+				origin: origin,
+				dest: dest
+			};
+		}
+
+		function applyMove(origin, dest) {
 
 			movement = dest;
 			callbackSelection(origin);
@@ -226,32 +271,31 @@ var Chess = Chess || {};
 			init: function(colorParam) {
 
 				agentColor = colorParam;
+				initWorkers();
 			},
 
 			activate: function(roundIndexParam) {
 
+				isActive = true;
 				roundIndex = roundIndexParam;
 			},
 
 			desactivate: function() {
 
+				isActive = false;
 			},
 
 			//	AI only
 			playSelection: function(pieces) {
 
-				/*let startTime = new Date().getTime();
-				let elapsedTime = 0;*/
+				startTime = new Date().getTime();
+				elapsedTime = 0;
 
-				//	Choose of a move
-				let result = max(pieces, settings.depth, agentColor, roundIndex);
+				//	Prepare tree search browsing for workers
+				prepareBrowsing(pieces, settings.depth, agentColor, roundIndex);
 
-				/*elapsedTime = new Date().getTime() - startTime;
-				console.log((elapsedTime/1000)+" secondes");*/
-
-				window.setTimeout(function() {
-					applyMovement(result.move.origin, result.move.dest);
-				}, 100);
+				//	Start iteration of tree by available workers
+				browse();
 			},
 
 			//	AI only

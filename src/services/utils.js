@@ -1,6 +1,6 @@
 /**
  * Ex: 
- * var random = Life.utils.getRandomInteger(0, 9);
+ * let random = Life.utils.getRandomInteger(0, 9);
  * console.log(random);
  *
  * @static
@@ -16,7 +16,7 @@ Chess.utils = (function(chess) {
 
 	/*** Private static properties ***/
 
-	var labels = {
+	var columnLabels = {
 		'a': 0,
 		'b': 1,
 		'c': 2,
@@ -27,6 +27,20 @@ Chess.utils = (function(chess) {
 		'h': 7
 	};
 
+	var typeLabels = {
+		'k': chess.types.king,
+		'q': chess.types.queen,
+		'b': chess.types.bishop,
+		'r': chess.types.rook,
+		'n': chess.types.knight,
+		'p': chess.types.pawn
+	};
+
+	var colorLabels = {
+		'w': chess.colors.white,
+		'b': chess.colors.black
+	};
+
 	var scope = {
 
 		/**
@@ -35,13 +49,35 @@ Chess.utils = (function(chess) {
 		 */
 		convertToArrayPosition: function(pos) {
 
-			let x = Number(labels[pos[0]]);
+			let x = Number(columnLabels[pos[0]]);
 			let y = 7 - Number(pos[1]) + 1;
 
 			return {
 				x: x,
 				y: y
 			}
+		},
+
+		/**
+		 * @param  string chessPos
+		 * @return object
+		 */
+		convertType: function(typeLabel) {
+
+			let type = Number(typeLabels[typeLabel]);
+
+			return type;
+		},
+
+		/**
+		 * @param  string chessPos
+		 * @return object
+		 */
+		convertColor: function(colorLabel) {
+
+			let color = Number(colorLabels[colorLabel]);
+
+			return color;
 		},
 
 		copyArray: function(arr) {
@@ -51,7 +87,7 @@ Chess.utils = (function(chess) {
 
 		switchColor: function(color) {
 
-			return (color === 'w') ? 'b' : 'w';
+			return (color === chess.colors.white) ? chess.colors.black : chess.colors.white;
 		},
 
 		compareArrays: function(array1, array2) {
@@ -65,6 +101,23 @@ Chess.utils = (function(chess) {
 					return value === array2[index];
 				})
 			);
+		},
+
+		compareSortedArrays: function(array1, array2) {
+
+			let result = false;
+
+			if (array1.length === array2.length) {
+				result = true;
+				for (let i=0, nb=array1.length; i<nb; i++) {
+					if (array1[i] !== array2[i]) {
+						result = false;
+						break;
+					}
+				}
+			}
+
+			return result;
 		},
 
 		getRandomInt: function(min, max) {

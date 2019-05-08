@@ -22,7 +22,7 @@ var Chess = Chess || {};
 		var blackAgent   = null;
 		var currentAgent = null;
 
-		var playerRound = null;
+		var playerRound = chess.colors.null;
 
 		/*** Private methods ***/
 
@@ -41,7 +41,7 @@ var Chess = Chess || {};
 
 			let roundIndex = controller.getRuleManager().getRoundIndex();
 
-			if (playerRound == 'w') {
+			if (playerRound == chess.colors.white) {
 				currentAgent = whiteAgent;
 				whiteAgent.activate(roundIndex);
 			}
@@ -123,8 +123,8 @@ var Chess = Chess || {};
 				controller = controllerParam;
 				whiteAgent = whiteAgentParam;
 				blackAgent = blackAgentParam;
-				whiteAgent.init('w');
-				blackAgent.init('b');
+				whiteAgent.init(chess.colors.white);
+				blackAgent.init(chess.colors.black);
 			},
 
 			initEventRegistering: function() {
@@ -138,11 +138,11 @@ var Chess = Chess || {};
 			 */
 			beforeAgentInitialized: function() {
 
-				if (playerRound == null) {
-					playerRound = 'w';
+				if (playerRound === chess.colors.null) {
+					playerRound = chess.colors.white;
 				}
 				else {
-					playerRound = (playerRound == 'w') ? 'b' : 'w';
+					playerRound = chess.utils.switchColor(playerRound);
 				}
 
 				activateAgent();

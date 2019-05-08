@@ -23,7 +23,7 @@ var Chess = Chess || {};
 		var canvas       = null;
 		var boardWith    = 0;
 		var boardHeight  = 0;
-		var caseSize     = null;
+		var caseSize     = 0;
 
 		var layer  = null;
 		var board  = null;
@@ -31,14 +31,6 @@ var Chess = Chess || {};
 
 		var ratio = 1;
 		var frameSize = 100; 
-		var frames = {
-			k: 1,
-			q: 2,
-			b: 3,
-			r: 4,
-			n: 5,
-			p: 6,
-		};
 
 		/*** Private methods ***/
 
@@ -168,14 +160,17 @@ var Chess = Chess || {};
 
 			pieces = new Array(8); // init
 			let piecesPositions = controller.pieces;
+			let frame  = 0;
+			let offset = 0;
 
 			for (let y=0; y<8; y++) {
 				pieces[y] = [null, null, null, null, null, null, null, null]; // init
 				for (let x=0; x<8; x++) {
 					let piece = piecesPositions[y][x];
 					if (piece !== null) {
-						let frame   = frames[piece.type];
-						let offset  = (piece.color === 'w') ? 1 : 0;
+
+						frame   = piece.type;
+						offset  = (piece.color === chess.colors.white) ? 1 : 0;
 						createPieceOnCase(x, y, frame, offset, piece);
 					}
 				}
@@ -228,7 +223,7 @@ var Chess = Chess || {};
 			let y = y2*frameSize;
 
 			//	A lucky pawn become a beautiful queen 
-			if (type !== null) {
+			if (type !== chess.types.null) {
 				let newPiece = piece.clone({
 					frame: 2
 				})
@@ -265,7 +260,7 @@ var Chess = Chess || {};
 
 		function changePlayerColor(playerColor) {
 
-			let color = (playerColor === 'w') ? 'white' : 'black';
+			let color = (playerColor === chess.colors.white) ? 'white' : 'black';
 
 			let $playerColor = $("#"+chessboardId).closest(".chess-board-container").find(".player-color");
 			$playerColor.css("background-color", color);
@@ -286,7 +281,7 @@ var Chess = Chess || {};
 			else if  (changes.opponentIsInCheckmate) {
 				let color = controller.getAgentManager().getPlayerColor();
 				text = "Checkmate.";
-				text += (color === 'w') ? " White wins!" : " Black wins!";
+				text += (color === chess.colors.white) ? " White wins!" : " Black wins!";
 			}
 			else if (changes.opponentIsInCheck) {
 				text = "Check!";
@@ -360,8 +355,7 @@ var Chess = Chess || {};
 				}
 
 				for (let move of changes.move) {
-					let type = (move.type == null) ? null : move.type;
-					movePiece(move.x1, move.y1, move.x2, move.y2, type);
+					movePiece(move.x1, move.y1, move.x2, move.y2, move.type);
 				}
 
 				applyState(changes);

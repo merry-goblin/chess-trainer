@@ -15,8 +15,8 @@ var Chess = Chess || {};
 
 		var settings = $.extend({}, settings);
 
-		var agentColor = null;
-		var roundIndex = null;
+		var agentColor = chess.colors.null;
+		var roundIndex = 0;
 
 		var callbackSelection = null;
 		var callbackMovement  = null;

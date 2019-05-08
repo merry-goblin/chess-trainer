@@ -152,7 +152,7 @@ var Chess = Chess || {};
 
 			is: function(state) {
 
-				return (stateMachine.getCurrentState() == state) ? true : false;
+				return (stateMachine.getCurrentState() === state) ? true : false;
 			},
 
 			afterAgentInitialized: function() {

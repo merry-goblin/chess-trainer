@@ -3,8 +3,8 @@
 var Chess = Chess || {};
 
 Chess.config = {
-	//loopInterval: 41,
 	loopInterval: 1000,
+	numberOfWorkers: 8,
 	defaultModel: {
 		a1: 'wr',
 		b1: 'wn',

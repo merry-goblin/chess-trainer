@@ -73,8 +73,8 @@ var Chess = Chess || {};
 
 			let piece = new chess.Piece();
 
-			piece.color = label[0];
-			piece.type  = label[1];
+			piece.color = chess.utils.convertColor(label[0]);
+			piece.type  = chess.utils.convertType(label[1]);
 			piece.last  = 0;
 
 			return piece;

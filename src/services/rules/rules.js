@@ -10,14 +10,16 @@ var Chess = Chess || {};
 
 Chess.rules = (function(chess) {
 
+	var maxNumberPiecesForDraw = 2;
+
 	var listOfInsufficientMaterial = [
-		{ p1: ['k'], p2: ['k']     },
-		{ p1: ['k'], p2: ['k','b'] },
-		{ p1: ['k'], p2: ['k','n'] }
+		{ p1: [chess.types.king], p2: [chess.types.king] },
+		{ p1: [chess.types.king], p2: [chess.types.king, chess.types.bishop] },
+		{ p1: [chess.types.king], p2: [chess.types.king, chess.types.knight] }
 	];
 
 	var unusualListOfInsufficientMaterial = [
-		{ p1: ['k','b'], p2: ['k','b'] }
+		{ p1: [chess.types.king, chess.types.bishop], p2: [chess.types.king, chess.types.bishop] }
 	];
 
 	function pieceIsBlocked(pieces, origin, dest, increments) {
@@ -83,15 +85,15 @@ Chess.rules = (function(chess) {
 
 	function castlingCondition(steps, origin, color) {
 
-		let y = (color === 'b') ? 0 : 7;
+		let y = (color === chess.colors.black) ? 0 : 7;
 
 		return (y === origin.y && (steps.x === -2 || steps.x === 2));
 	}
 
 	function movePawnConditionWithoutPieceTaken(steps, origin, color) {
 
-		let factor = (color === 'b') ? 1 : -1;
-		let start  = (color === 'b') ? 1 : 6;
+		let factor = (color === chess.colors.black) ? 1 : -1;
+		let start  = (color === chess.colors.black) ? 1 : 6;
 		let y      = steps.y * factor;
 
 		return (steps.x === 0 && (y === 1 || (y === 2 && start == origin.y)));
@@ -99,7 +101,7 @@ Chess.rules = (function(chess) {
 
 	function movePawnConditionWithPieceTaken(steps, color) {
 
-		let factor = (color === 'b') ? 1 : -1;
+		let factor = (color === chess.colors.black) ? 1 : -1;
 		let y      = steps.y * factor;
 
 		return (y === 1 && (steps.x === 1 || steps.x === -1));
@@ -282,7 +284,7 @@ Chess.rules = (function(chess) {
 			result.remove.push(new chess.Position(dest.x, dest.y));
 		}
 		if (result.isAllowed) {
-			result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y, null));
+			result.move.push(new chess.Move(origin.x, origin.y, dest.x, dest.y, chess.types.null));
 		}
 
 		return result;
@@ -290,8 +292,8 @@ Chess.rules = (function(chess) {
 
 	function buildResultPawnMoveOnly(result, pieces, origin, dest, color) {
 
-		let border = (color === 'w')     ? 0  : 7;
-		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
+		let border = (color === chess.colors.white)     ? 0  : 7;
+		let type   = (dest.y === border) ? chess.types.queen: chess.types.null; // Pawn promotion
 		let dist   = dest.y - origin.y;
 
 		if (pieces[dest.y][dest.x] === null) {
@@ -304,8 +306,8 @@ Chess.rules = (function(chess) {
 
 	function buildResultPawnTakeOnly(result, pieces, origin, dest, color, roundIndex) {
 
-		let border = (color === 'w')     ? 0  : 7;
-		let type   = (dest.y === border) ? 'q': null; // Pawn promotion
+		let border = (color === chess.colors.white)     ? 0  : 7;
+		let type   = (dest.y === border) ? chess.types.queen: chess.types.null; // Pawn promotion
 
 		if (pieces[dest.y][dest.x] !== null) {
 			if (pieces[origin.y][origin.x].color != pieces[dest.y][dest.x].color) {
@@ -317,9 +319,9 @@ Chess.rules = (function(chess) {
 		}
 		else {
 			//	En passant
-			let decrement = (color === 'w') ? 1 : -1;
+			let decrement = (color === chess.colors.white) ? 1 : -1;
 			let taken     = pieces[dest.y+decrement][dest.x];
-			if (taken !== null && /*taken.type === 'p' &&*/ taken.hasRushed && taken.last === (roundIndex-1)) {
+			if (taken !== null && taken.hasRushed && taken.last === (roundIndex-1)) {
 				//	En passant succeed
 				result.isAllowed = true;
 				result.remove.push(new chess.Position(dest.x, dest.y+decrement));
@@ -333,11 +335,8 @@ Chess.rules = (function(chess) {
 
 	function getRookPositionOnCastling(dest) {
 
-		let rookPosition = { 
-			x: null, 
-			y: dest.y 
-		};
-		rookPosition.x = (dest.x === 2) ? 0 : 7;
+		let x = (dest.x === 2) ? 0 : 7;
+		let rookPosition = new chess.Position(x, dest.y);
 
 		return rookPosition;
 	}
@@ -377,8 +376,8 @@ Chess.rules = (function(chess) {
 
 		let rookPosition   = getRookPositionOnCastling(dest);
 
-		if (doesPieceIsValidOnCastling(pieces, rookPosition, 'r') &&
-			doesPieceIsValidOnCastling(pieces, origin, 'k')) {
+		if (doesPieceIsValidOnCastling(pieces, rookPosition, chess.types.rook) &&
+			doesPieceIsValidOnCastling(pieces, origin, chess.types.king)) {
 
 			if (doesPathIsFreeOnCastling(pieces, origin, rookPosition)) {
 
@@ -468,7 +467,7 @@ Chess.rules = (function(chess) {
 	 */
 	function selfInCheck(pieces, roundIndex, changes, color) {
 
-		let kingPosition = findPiece(pieces, color, 'k');
+		let kingPosition = findPiece(pieces, color, chess.types.king);
 
 		simulation:
 		for (let y=0; y<8; y++) {
@@ -500,7 +499,7 @@ Chess.rules = (function(chess) {
 	function opponentInCheck(pieces, roundIndex, color) {
 
 		let opponentIsInCheck = false;
-		let kingPosition      = findPiece(pieces, color, 'k');
+		let kingPosition      = findPiece(pieces, color, chess.types.king);
 
 		simulation:
 		for (let y=0; y<8; y++) {
@@ -617,28 +616,40 @@ Chess.rules = (function(chess) {
 
 		let draws = false;
 
-		let blackPieces = chess.simulator.allAvailablePieces(pieces, 'b');
-		let whitePieces = chess.simulator.allAvailablePieces(pieces, 'w');
+		let blackPieces = chess.simulator.allAvailablePieces(pieces, chess.colors.black);
+		let whitePieces = chess.simulator.allAvailablePieces(pieces, chess.colors.white);
 
-		if (isThereInsufficientMaterial(blackPieces, whitePieces, listOfInsufficientMaterial) ||
-		    isThereInsufficientMaterial(whitePieces, blackPieces, listOfInsufficientMaterial)) {
-			draws = true;
-		}
-		else if (isThereInsufficientMaterial(blackPieces, whitePieces, unusualListOfInsufficientMaterial) ||
-		         isThereInsufficientMaterial(whitePieces, blackPieces, unusualListOfInsufficientMaterial)) {
-			
-			//	In a square of the same color ?
-			let p1Bishop = findPiece(pieces, 'w', 'b');
-			let p2Bishop = findPiece(pieces, 'b', 'b');
+		if (blackPieces.length <= maxNumberPiecesForDraw || whitePieces.length <= maxNumberPiecesForDraw) {
 
-			if (((p1Bishop.x+p1Bishop.y) % 2) === ((p2Bishop.x+p2Bishop.y) % 2)) {
+			blackPieces.sort();
+			whitePieces.sort();
+
+			if (isThereInsufficientMaterial(blackPieces, whitePieces, listOfInsufficientMaterial) ||
+			    isThereInsufficientMaterial(whitePieces, blackPieces, listOfInsufficientMaterial)) {
 				draws = true;
+			}
+			else if (isThereInsufficientMaterial(blackPieces, whitePieces, unusualListOfInsufficientMaterial) ||
+			         isThereInsufficientMaterial(whitePieces, blackPieces, unusualListOfInsufficientMaterial)) {
+				
+				//	In a square of the same color ?
+				let p1Bishop = findPiece(pieces, chess.colors.white, chess.types.bishop);
+				let p2Bishop = findPiece(pieces, chess.colors.black, chess.types.bishop);
+
+				if (((p1Bishop.x+p1Bishop.y) % 2) === ((p2Bishop.x+p2Bishop.y) % 2)) {
+					draws = true;
+				}
 			}
 		}
 
 		return draws;
 	}
 
+	/**
+	 * @param  array[string] p1Pieces  sorted array of chars
+	 * @param  array[string] p2Pieces  sorted array of chars
+	 * @param  array[string] checkList sorted array of chars
+	 * @return boolean
+	 */
 	function isThereInsufficientMaterial(p1Pieces, p2Pieces, checkList) {
 
 		let insufficient = false;
@@ -646,8 +657,8 @@ Chess.rules = (function(chess) {
 		parsing:
 		for (let i=0, nb=checkList; i<nb; i++) {
 			let checkCase = checkList[i];
-			if (chess.utils.compareArrays(p1Pieces, checkCase.p1) &&
-				chess.utils.compareArrays(p2Pieces, checkCase.p2)) {
+			if (chess.utils.compareSortedArrays(p1Pieces, checkCase.p1) &&
+				chess.utils.compareSortedArrays(p2Pieces, checkCase.p2)) {
 				insufficient = true;
 				break parsing;
 			}
@@ -666,22 +677,22 @@ Chess.rules = (function(chess) {
 			let piece  = pieces[origin.y][origin.x];
 
 			switch (piece.type) {
-				case 'r':
+				case chess.types.rook:
 					result = moveRook(pieces, origin, dest);
 					break;
-				case 'n': // knight
+				case chess.types.knight:
 					result = moveKnight(pieces, origin, dest);
 					break;
-				case 'b':
+				case chess.types.bishop:
 					result = moveBishop(pieces, origin, dest);
 					break;
-				case 'q':
+				case chess.types.queen:
 					result = moveQueen(pieces, origin, dest);
 					break;
-				case 'k':
+				case chess.types.king:
 					result = moveKing(pieces, origin, dest);
 					break;
-				case 'p':
+				case chess.types.pawn:
 					result = movePawn(pieces, origin, dest, roundIndex);
 					break;
 			}
