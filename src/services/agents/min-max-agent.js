@@ -48,21 +48,11 @@ var Chess = Chess || {};
 			workers = new Array(chess.config.numberOfWorkers);
 			for (let i=0; i<chess.config.numberOfWorkers; i++) {
 
-				workers[i] = new Chess.Worker();
+				let workerManager = new Chess.WorkerManager();
+				workerManager.init('src/services/agents/min-max-worker.js', i, messageFromWorker);
+				workerManager.load();
 
-				let worker = new Worker('src/services/agents/min-max-worker.js');
-				workers[i].worker = worker;
-
-				worker.addEventListener('message', function(e) {
-					messageFromWorker(e.data);
-				});
-				worker.state = 'loading';
-				worker.postMessage({
-					id: i,
-					num: 0,
-					action: 'load',
-					params: null
-				});
+				workers[i] = workerManager;
 			}
 		}
 
@@ -71,7 +61,7 @@ var Chess = Chess || {};
 			let workerId = null;
 
 			for (let i=0; i<chess.config.numberOfWorkers; i++) {
-				if (workers[i].state === 'loaded' || workers[i].state === 'browsed') {
+				if (workers[i].is('available')) {
 					workerId = i;
 					break;
 				}
@@ -121,7 +111,7 @@ var Chess = Chess || {};
 				}, 100);
 
 				elapsedTime = new Date().getTime() - startTime;
-				/*console.log((elapsedTime/1000)+" secondes");*/
+				console.log((elapsedTime/1000)+" secondes");
 			}
 			else {
 				browse();
@@ -171,18 +161,19 @@ var Chess = Chess || {};
 				if (workerId === null) {
 					break simulation;
 				}
-				let worker = workers[workerId].worker;
 
 				//	Move
 				let move = searchMove(browsing.currentMove);
 
-				workers[workerId].state = 'browsing';
-				worker.postMessage({
-					id: workerId,
-					num: browsing.currentMove,
-					action: 'max',
-					params: { pieces: browsing.pieces, depth: browsing.depth, color: browsing.color, round: browsing.round, origin: move.origin, dest: move.dest }
-				});
+				let params = { 
+					pieces: browsing.pieces, 
+					depth: browsing.depth, 
+					color: browsing.color, 
+					round: browsing.round, 
+					origin: move.origin, 
+					dest: move.dest 
+				};
+				workers[workerId].browse(browsing.currentMove, params);
 
 				browsing.currentMove++;
 			}
