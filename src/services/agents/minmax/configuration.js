@@ -7,8 +7,7 @@
 /** @namespace */
 var Chess = Chess || {};
 
-Chess.Worker = function() {
+Chess.MinMaxConfiguration = function(pruneThresholdParam) {
 
-	this.worker  = false;
-	this.state   = null;
+	this.pruneThreshold = pruneThresholdParam;
 };

@@ -41,5 +41,6 @@ Chess.config = {
 		f8: 'bb',
 		g8: 'bn',
 		h8: 'br'
-	}
+	},
+	counter: 0
 }

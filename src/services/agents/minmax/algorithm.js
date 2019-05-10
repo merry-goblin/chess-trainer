@@ -32,26 +32,37 @@ Chess.minMaxAlgorithm = (function(chess) {
 	 * @return integer
 	 */
 	function evaluate(pieces, changes, factor) {
-
+chess.config.counter++;
 		let value = 0;
 		let piece = null;
 
+		//	Piece taken
 		for (let remove of changes.remove) {
 			piece = pieces[remove.y][remove.x];
 			value += piecesCost[piece.type] * factor;
 		}
 
+		for (let move of changes.move) {
+			//	Promotion
+			if (move.type !== chess.types.null) {
+				value += piecesCost[move.type] * factor;
+			}
+		}
+
 		if (changes.opponentIsInCheck) {
 			value += checkCost * factor;
 		}
+
+		//	Game over
 		if (changes.draws) {
 			value += drawsCost * factor;
 		}
 		if (changes.opponentIsInCheckmate) {
-			value += piecesCost.k * factor;
+			value += piecesCost[chess.types.king] * factor;
 		}
 
-		value += chess.utils.getRandomInt(-3, 3);
+		//	Some randomness to get a different behavior each match
+		value += chess.utils.getRandomInt(-2, 2);
 
 		return value;
 	}
@@ -97,7 +108,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 
 	var scope = {
 
-		maxIteration: function(pieces, depth, color, round, origin, dest) {
+		maxIteration: function(pieces, depth, color, round, origin, dest, prunesThreshold) {
 
 			let maxValue = Number.NEGATIVE_INFINITY;
 
@@ -118,7 +129,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 					chess.simulator.applyChanges(nextPieces, round, changes);
 
 					//	Calculation of move value
-					let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound);
+					let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound, prunesThreshold);
 					value       += minValue;
 				}
 
@@ -130,7 +141,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 			return maxValue;
 		},
 
-		max: function(pieces, depth, color, round) {
+		max: function(pieces, depth, color, round, prunesThreshold) {
 
 			let maxValue = Number.NEGATIVE_INFINITY;
 
@@ -160,7 +171,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 							chess.simulator.applyChanges(nextPieces, round, changes);
 
 							//	Calculation of move value
-							let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound);
+							let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound, prunesThreshold);
 							value       += minValue;
 						}
 
@@ -174,7 +185,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 			return maxValue;
 		},
 
-		min: function(pieces, depth, color, round) {
+		min: function(pieces, depth, color, round, prunesThreshold) {
 
 			let minValue = Number.POSITIVE_INFINITY;
 
@@ -203,7 +214,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 							chess.simulator.applyChanges(nextPieces, round, changes);
 
 							//	Calculation of move value
-							let maxValue = this.max(nextPieces, nextDepth, nextColor, nextRound);
+							let maxValue = this.max(nextPieces, nextDepth, nextColor, nextRound, prunesThreshold);
 							value       += maxValue;
 						}
 

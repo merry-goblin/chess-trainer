@@ -49,7 +49,7 @@ var Chess = Chess || {};
 			for (let i=0; i<chess.config.numberOfWorkers; i++) {
 
 				let workerManager = new Chess.WorkerManager();
-				workerManager.init('src/services/agents/min-max-worker.js', i, messageFromWorker);
+				workerManager.init('src/services/agents/minmax/worker.js', i, messageFromWorker);
 				workerManager.load();
 
 				workers[i] = workerManager;

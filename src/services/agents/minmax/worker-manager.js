@@ -40,8 +40,9 @@ var Chess = Chess || {};
 
 		function buildWorker(workerScript, id, callback) {
 
-			workerId = id;
-			worker = new Worker(workerScript);
+			worker      = new Worker(workerScript);
+			workerId    = id;
+
 			worker.addEventListener('message', function(e) {
 				switch (e.data.state) {
 					case 'loaded':
@@ -73,12 +74,12 @@ var Chess = Chess || {};
 
 			/*** Public methods ***/
 
-			init: function(workerScript, id, callback) {
+			init: function(workerScript, id, callback, config) {
 
 				self = this;
 
 				buildStateMachine();
-				buildWorker(workerScript, id, callback);
+				buildWorker(workerScript, id, callback, config);
 			},
 
 			getWorker: function() {

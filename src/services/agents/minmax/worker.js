@@ -11,23 +11,23 @@ Chess.MinMaxWorker = {
 
 	load: function(params) {
 
-		importScripts('../../../config/constants.js');
-		importScripts('../../entities/change.js');
-		importScripts('../../entities/move.js');
-		importScripts('../../entities/piece.js');
-		importScripts('../../entities/position.js');
-		importScripts('../utils.js');
-		importScripts('../rules/rules.js');
-		importScripts('../rules/simulator.js');
-		importScripts('min-max-algorithm.js');
+		importScripts('../../../../config/app.js');
+		importScripts('../../../../config/constants.js');
+		importScripts('../../../entities/change.js');
+		importScripts('../../../entities/move.js');
+		importScripts('../../../entities/piece.js');
+		importScripts('../../../entities/position.js');
+		importScripts('../../utils.js');
+		importScripts('../../rules/rules.js');
+		importScripts('../../rules/simulator.js');
+		importScripts('algorithm.js');
 
 		return null;
 	},
 
 	max: function(params) {
-
 		let value = Chess.minMaxAlgorithm.maxIteration(params.pieces, params.depth, params.color, params.round, params.origin, params.dest);
-
+console.log(Chess.config.counter);Chess.config.counter = 0;
 		return value;
 	}
 };
