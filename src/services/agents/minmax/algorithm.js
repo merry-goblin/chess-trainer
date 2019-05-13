@@ -22,8 +22,11 @@ Chess.minMaxAlgorithm = (function(chess) {
 	piecesCost[chess.types.knight] = 18;
 	piecesCost[chess.types.pawn]   = 5;
 
-	var checkCost = 2;
-	var drawsCost = -2;
+	var checkCost = 3;
+	var drawsCost = -3;
+
+	var maxPrunesThreshold = 20;
+	var minPrunesThreshold = -20;
 
 	/**
 	 * @param  array[Chess.Piece] pieces
@@ -32,7 +35,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 	 * @return integer
 	 */
 	function evaluate(pieces, changes, factor) {
-chess.config.counter++;
+//chess.config.counter++;
 		let value = 0;
 		let piece = null;
 
@@ -62,7 +65,7 @@ chess.config.counter++;
 		}
 
 		//	Some randomness to get a different behavior each match
-		value += chess.utils.getRandomInt(-2, 2);
+		value += chess.utils.getRandomInt(-1, 1);
 
 		return value;
 	}
@@ -108,7 +111,7 @@ chess.config.counter++;
 
 	var scope = {
 
-		maxIteration: function(pieces, depth, color, round, origin, dest, prunesThreshold) {
+		maxIteration: function(pieces, depth, color, round, origin, dest) {
 
 			let maxValue = Number.NEGATIVE_INFINITY;
 
@@ -129,7 +132,7 @@ chess.config.counter++;
 					chess.simulator.applyChanges(nextPieces, round, changes);
 
 					//	Calculation of move value
-					let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound, prunesThreshold);
+					let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound);
 					value       += minValue;
 				}
 
@@ -141,7 +144,7 @@ chess.config.counter++;
 			return maxValue;
 		},
 
-		max: function(pieces, depth, color, round, prunesThreshold) {
+		max: function(pieces, depth, color, round) {
 
 			let maxValue = Number.NEGATIVE_INFINITY;
 
@@ -153,6 +156,7 @@ chess.config.counter++;
 			let availablePieces           = getAvailablePiecesPositions(pieces, color);
 			let availablePiecesMovements  = getAvailablePiecesMovements(pieces, round, availablePieces);
 
+			evaluation:
 			for (let p=0, nbPieces=availablePieces.length; p<nbPieces; p++) {
 				let origin = availablePieces[p];
 				for (let m=0, nbMovements=availablePiecesMovements[p].length; m<nbMovements; m++) {
@@ -171,12 +175,16 @@ chess.config.counter++;
 							chess.simulator.applyChanges(nextPieces, round, changes);
 
 							//	Calculation of move value
-							let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound, prunesThreshold);
+							let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound);
 							value       += minValue;
 						}
 
 						if (value > maxValue) {
 							maxValue = value;
+							if (maxValue >= maxPrunesThreshold) {
+								//console.log("maxValue: ",maxValue, " pruning p/nbPieces "+p+"/"+nbPieces+" m/nbMovements "+m+"/"+nbMovements, "origin: ",origin, "dest: ", dest);
+								break evaluation;
+							}
 						}
 					}
 				}
@@ -185,7 +193,7 @@ chess.config.counter++;
 			return maxValue;
 		},
 
-		min: function(pieces, depth, color, round, prunesThreshold) {
+		min: function(pieces, depth, color, round) {
 
 			let minValue = Number.POSITIVE_INFINITY;
 
@@ -197,6 +205,7 @@ chess.config.counter++;
 			let availablePieces           = getAvailablePiecesPositions(pieces, color);
 			let availablePiecesMovements  = getAvailablePiecesMovements(pieces, round, availablePieces);
 
+			evaluation: 
 			for (let p=0, nbPieces=availablePieces.length; p<nbPieces; p++) {
 				let origin = availablePieces[p];
 				for (let m=0, nbMovements=availablePiecesMovements[p].length; m<nbMovements; m++) {
@@ -214,12 +223,16 @@ chess.config.counter++;
 							chess.simulator.applyChanges(nextPieces, round, changes);
 
 							//	Calculation of move value
-							let maxValue = this.max(nextPieces, nextDepth, nextColor, nextRound, prunesThreshold);
+							let maxValue = this.max(nextPieces, nextDepth, nextColor, nextRound);
 							value       += maxValue;
 						}
 
 						if (value < minValue) {
 							minValue = value;
+							if (minValue <= minPrunesThreshold) {
+								//console.log("minValue: ",minValue, " pruning p/nbPieces "+p+"/"+nbPieces+" m/nbMovements "+m+"/"+nbMovements, "origin: ",origin, "dest: ", dest);
+								break evaluation;
+							}
 						}
 					}
 				}

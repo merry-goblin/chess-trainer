@@ -111,7 +111,7 @@ var Chess = Chess || {};
 				}, 100);
 
 				elapsedTime = new Date().getTime() - startTime;
-				console.log((elapsedTime/1000)+" secondes");
+				/*console.log((elapsedTime/1000)+" secondes", "total moves: ", browsing.totalMoves*/);
 			}
 			else {
 				browse();

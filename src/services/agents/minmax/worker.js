@@ -27,7 +27,7 @@ Chess.MinMaxWorker = {
 
 	max: function(params) {
 		let value = Chess.minMaxAlgorithm.maxIteration(params.pieces, params.depth, params.color, params.round, params.origin, params.dest);
-console.log(Chess.config.counter);Chess.config.counter = 0;
+//console.log("counter: ", Chess.config.counter, "value: ", value, "origin: ", params.origin, "dest: ", params.dest);Chess.config.counter = 0;
 		return value;
 	}
 };
