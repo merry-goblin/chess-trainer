@@ -25,8 +25,8 @@ Chess.minMaxAlgorithm = (function(chess) {
 	var checkCost = 3;
 	var drawsCost = -3;
 
-	var maxPrunesThreshold = 20;
-	var minPrunesThreshold = -20;
+	var maxPrunesThreshold = 25;
+	var minPrunesThreshold = -25;
 
 	/**
 	 * @param  array[Chess.Piece] pieces

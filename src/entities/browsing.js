@@ -20,4 +20,5 @@ Chess.Browsing = function() {
 	this.availablePieces           = null;
 	this.availablePiecesMovements  = null;
 	this.totalMoves                = 0;
+	this.end                       = false;
 };
