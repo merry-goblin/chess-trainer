@@ -94,32 +94,28 @@ var Chess = Chess || {};
 		function evalWorkerResponse(workerId, processNumber, state, value) {
 
 			workers[workerId].state  = state;
-			if (!browsing.end) {
-				if (browsing.bestScore < value) {
-					browsing.bestScore = value;
-					browsing.bestMove  = processNumber;
-					if (browsing.bestScore >= 25) {
-						browsing.end = true;
-					}
-				}
 
-				//	Check if all moves have been evaluated
-				browsing.numberOfEval++;
-				if (browsing.end || browsing.numberOfEval === browsing.totalMoves) {
+			if (browsing.bestScore < value) {
+				browsing.bestScore = value;
+				browsing.bestMove  = processNumber;
+			}
 
-					//	End
-					let move = searchMove(browsing.bestMove);
+			//	Check if all moves have been evaluated
+			browsing.numberOfEval++;
+			if (browsing.numberOfEval === browsing.totalMoves) {
 
-					window.setTimeout(function() {
-						applyMove(move.origin, move.dest);
-					}, 100);
+				//	End
+				let move = searchMove(browsing.bestMove);
 
-					elapsedTime = new Date().getTime() - startTime;
-					/*console.log((elapsedTime/1000)+" secondes", "total moves: ", browsing.totalMoves);*/
-				}
-				else {
-					browse();
-				}
+				window.setTimeout(function() {
+					applyMove(move.origin, move.dest);
+				}, 100);
+
+				elapsedTime = new Date().getTime() - startTime;
+				/*console.log((elapsedTime/1000)+" secondes", "total moves: ", browsing.totalMoves);*/
+			}
+			else {
+				browse();
 			}
 		}
 
