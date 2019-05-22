@@ -25,9 +25,6 @@ Chess.minMaxAlgorithm = (function(chess) {
 	var checkCost = 3;
 	var drawsCost = -3;
 
-	var maxPrunesThreshold = 25;
-	var minPrunesThreshold = -25;
-
 	/**
 	 * @param  array[Chess.Piece] pieces
 	 * @param  Chess.Change       changes
@@ -111,7 +108,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 
 	var scope = {
 
-		maxIteration: function(pieces, depth, color, round, origin, dest) {
+		maxIteration: function(pieces, depth, color, round, origin, dest, alpha, beta) {
 
 			let maxValue = Number.NEGATIVE_INFINITY;
 
@@ -132,7 +129,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 					chess.simulator.applyChanges(nextPieces, round, changes);
 
 					//	Calculation of move value
-					let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound);
+					let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound, alpha, beta);
 					value       += minValue;
 				}
 
@@ -144,7 +141,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 			return maxValue;
 		},
 
-		max: function(pieces, depth, color, round) {
+		max: function(pieces, depth, color, round, alpha, beta) {
 
 			let maxValue = Number.NEGATIVE_INFINITY;
 
@@ -175,15 +172,18 @@ Chess.minMaxAlgorithm = (function(chess) {
 							chess.simulator.applyChanges(nextPieces, round, changes);
 
 							//	Calculation of move value
-							let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound);
+							let minValue = this.min(nextPieces, nextDepth, nextColor, nextRound, alpha, beta);
 							value       += minValue;
 						}
 
 						if (value > maxValue) {
 							maxValue = value;
-							if (maxValue >= maxPrunesThreshold) {
-								//console.log("maxValue: ",maxValue, " pruning p/nbPieces "+p+"/"+nbPieces+" m/nbMovements "+m+"/"+nbMovements, "origin: ",origin, "dest: ", dest);
-								break evaluation;
+							if (maxValue > alpha) {
+								alpha = maxValue;
+								if (beta <= alpha) {
+									//console.log("pruning p:"+p+"/nbPieces:"+nbPieces+" m:"+m+"/nbMovements:"+nbMovements);
+									break evaluation;
+								}
 							}
 						}
 					}
@@ -193,7 +193,7 @@ Chess.minMaxAlgorithm = (function(chess) {
 			return maxValue;
 		},
 
-		min: function(pieces, depth, color, round) {
+		min: function(pieces, depth, color, round, alpha, beta) {
 
 			let minValue = Number.POSITIVE_INFINITY;
 
@@ -223,15 +223,18 @@ Chess.minMaxAlgorithm = (function(chess) {
 							chess.simulator.applyChanges(nextPieces, round, changes);
 
 							//	Calculation of move value
-							let maxValue = this.max(nextPieces, nextDepth, nextColor, nextRound);
+							let maxValue = this.max(nextPieces, nextDepth, nextColor, nextRound, alpha, beta);
 							value       += maxValue;
 						}
 
 						if (value < minValue) {
 							minValue = value;
-							if (minValue <= minPrunesThreshold) {
-								//console.log("minValue: ",minValue, " pruning p/nbPieces "+p+"/"+nbPieces+" m/nbMovements "+m+"/"+nbMovements, "origin: ",origin, "dest: ", dest);
-								break evaluation;
+							if (minValue < beta) {
+								beta = minValue;
+								if (beta <= alpha) {
+									//console.log("pruning p:"+p+"/nbPieces:"+nbPieces+" m:"+m+"/nbMovements:"+nbMovements);
+									break evaluation;
+								}
 							}
 						}
 					}
