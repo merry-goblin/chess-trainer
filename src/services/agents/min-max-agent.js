@@ -109,10 +109,10 @@ var Chess = Chess || {};
 
 				window.setTimeout(function() {
 					applyMove(move.origin, move.dest);
-				}, 100);
+				}, 1000);
 
 				elapsedTime = new Date().getTime() - startTime;
-				/*console.log((elapsedTime/1000)+" secondes", "total moves: ", browsing.totalMoves);*/
+				console.log((elapsedTime/1000)+" secondes", "total moves: ", browsing.totalMoves);
 			}
 			else {
 				browse();
@@ -129,6 +129,8 @@ var Chess = Chess || {};
 			browsing.round                     = round;
 			browsing.bestScore                 = Number.NEGATIVE_INFINITY;
 			browsing.bestMove                  = 0;
+			browsing.alpha                     = Number.NEGATIVE_INFINITY;
+			browsing.beta                      = Number.POSITIVE_INFINITY;
 			browsing.currentMove               = 0;
 			browsing.numberOfEval              = 0;
 			browsing.availablePieces           = getAvailablePiecesPositions(pieces, color);
@@ -173,7 +175,9 @@ var Chess = Chess || {};
 					color: browsing.color, 
 					round: browsing.round, 
 					origin: move.origin, 
-					dest: move.dest 
+					dest: move.dest, 
+					alpha: browsing.alpha, 
+					beta: browsing.beta
 				};
 				workers[workerId].browse(browsing.currentMove, params);
 

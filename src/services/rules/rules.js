@@ -618,9 +618,8 @@ Chess.rules = (function(chess) {
 
 		let blackPieces = chess.simulator.allAvailablePieces(pieces, chess.colors.black);
 		let whitePieces = chess.simulator.allAvailablePieces(pieces, chess.colors.white);
-
+	
 		if (blackPieces.length <= maxNumberPiecesForDraw || whitePieces.length <= maxNumberPiecesForDraw) {
-
 			blackPieces.sort();
 			whitePieces.sort();
 
@@ -630,7 +629,7 @@ Chess.rules = (function(chess) {
 			}
 			else if (isThereInsufficientMaterial(blackPieces, whitePieces, unusualListOfInsufficientMaterial) ||
 			         isThereInsufficientMaterial(whitePieces, blackPieces, unusualListOfInsufficientMaterial)) {
-				
+
 				//	In a square of the same color ?
 				let p1Bishop = findPiece(pieces, chess.colors.white, chess.types.bishop);
 				let p2Bishop = findPiece(pieces, chess.colors.black, chess.types.bishop);
@@ -653,9 +652,8 @@ Chess.rules = (function(chess) {
 	function isThereInsufficientMaterial(p1Pieces, p2Pieces, checkList) {
 
 		let insufficient = false;
-
 		parsing:
-		for (let i=0, nb=checkList; i<nb; i++) {
+		for (let i=0, nb=checkList.length; i<nb; i++) {
 			let checkCase = checkList[i];
 			if (chess.utils.compareSortedArrays(p1Pieces, checkCase.p1) &&
 				chess.utils.compareSortedArrays(p2Pieces, checkCase.p2)) {
